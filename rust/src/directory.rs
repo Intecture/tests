@@ -8,8 +8,8 @@ pub struct DirectoryTest;
 impl Testable for DirectoryTest {
     fn test(mut host: &mut Host) {
         let tempdir = TempDir::new("directory_test").unwrap();
-        let testpath = format!("{:?}/path/to/dir", tempdir.path());
-        let mvpath = format!("{:?}/path/to/mv_dir", tempdir.path());
+        let testpath = format!("{}/path/to/dir", tempdir.path().to_str().unwrap());
+        let mvpath = format!("{}/path/to/mv_dir", tempdir.path().to_str().unwrap());
 
         let telemetry = Telemetry::init(&mut host).unwrap();
 
