@@ -10,6 +10,17 @@ class PackageTest implements Testable {
     private $host;
 
     public function test($host) {
+        $telemetry = Telemetry::load($host);
+        $tdata = $telemetry->get();
+
+        if ($tdata['os']['platform'] == 'centos') {
+            $epel_pkg = new Package($host, 'epel-release');
+            $result = $epel_pkg->install($host);
+            if ($result !== NULL) {
+                assert($result['exit_code'] == 0);
+            }
+        }
+
         $pkg = new Package($host, "nginx");
         assert(!$pkg->is_installed());
 
@@ -45,8 +56,6 @@ class PackageTest implements Testable {
 
         assert(!$pkg->is_installed());
 
-        $telemetry = Telemetry::load($host);
-        $tdata = $telemetry->get();
         switch ($tdata['os']['platform']) {
             case 'centos':
                 $provider = Package::PROVIDER_YUM;
