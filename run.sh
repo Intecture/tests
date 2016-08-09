@@ -73,7 +73,7 @@ main() {
 
     # Full stack tests
     helper_run vagrant rust || exit 1
-    helper_run vagrant c || exit 1
+    # helper_run vagrant c || exit 1
     helper_run vagrant php || exit 1
 }
 
