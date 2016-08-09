@@ -11,7 +11,7 @@
 set -u
 
 # Globals
-install_dir="/tmp/intecture-tests"
+install_dir="/var/tmp/intecture-tests"
 os=
 
 main() {

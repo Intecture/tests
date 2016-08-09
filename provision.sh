@@ -41,7 +41,7 @@ export PATH=$PATH:/usr/local/bin
 export RUST_BACKTRACE=1
 
 # Install ZMQ
-cd /tmp
+cd /var/tmp
 curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz
 curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz.sig
 curl -sSOL https://download.libsodium.org/jedi.gpg.asc
