@@ -25,7 +25,7 @@ case $1 in
         ;;
 
     freebsd )
-        env ASSUME_ALWAYS_YES=YES sudo pkg install git libtool gcc glib gmake automake autoconf pkgconf php
+        env ASSUME_ALWAYS_YES=YES sudo pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php56 curl gnupg
         ;;
 
     ubuntu )
