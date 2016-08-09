@@ -39,6 +39,10 @@ main() {
     echo -n "Starting auth daemon..."
     sed 's/7101/7103/' </usr/local/etc/intecture/auth.json >auth.json.tmp
     sed 's/7102/7104/' <auth.json.tmp >/usr/local/etc/intecture/auth.json
+    if pgrep inauth; then
+        echo -n "restarting..."
+        pkill -9 inauth
+    fi
     inauth &
     echo "done"
 
@@ -60,6 +64,10 @@ main() {
 
     # Start Agent daemon
     echo -n "Starting agent..."
+    if pgrep inagent; then
+       echo -n "restarting..."
+       pkill -9 inagent
+    fi
     inagent &
     echo "done"
 
