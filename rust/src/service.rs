@@ -75,5 +75,10 @@ impl Testable for ServiceTest {
             }
             _ => unimplemented!()
         }
+
+        let mut pkg = Package::new(&mut host, "nginx", None).unwrap();
+        if let PackageResult::Result(cmd) = pkg.uninstall(&mut host).unwrap() {
+            assert_eq!(cmd.exit_code, 0);
+        }
     }
 }
