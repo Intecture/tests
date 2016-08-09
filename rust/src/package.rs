@@ -5,7 +5,7 @@ pub struct PackageTest;
 
 impl Testable for PackageTest {
     fn test(mut host: &mut Host) {
-        let mut pkg = Package::new(&mut host, "screen", None).unwrap();
+        let mut pkg = Package::new(&mut host, "nginx", None).unwrap();
         assert!(!pkg.is_installed());
         if let PackageResult::Result(cmd) = pkg.install(&mut host).unwrap() {
             assert_eq!(cmd.exit_code, 0);
@@ -35,9 +35,9 @@ impl Testable for PackageTest {
             "macos" => (Providers::Homebrew, Providers::Dnf),
             _ => unimplemented!(),
         };
-        let pkg = Package::new(&mut host, "screen", Some(ok)).unwrap();
+        let pkg = Package::new(&mut host, "nginx", Some(ok)).unwrap();
         assert!(!pkg.is_installed());
 
-        assert!(Package::new(&mut host, "screen", Some(bogus)).is_err());
+        assert!(Package::new(&mut host, "nginx", Some(bogus)).is_err());
     }
 }

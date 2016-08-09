@@ -10,7 +10,7 @@ class PackageTest implements Testable {
     private $host;
 
     public function test($host) {
-        $pkg = new Package($host, "screen");
+        $pkg = new Package($host, "nginx");
         assert(!$pkg->is_installed());
 
         $result = $pkg->install($host);
@@ -66,7 +66,7 @@ class PackageTest implements Testable {
                 break;
         }
 
-        $pkg = new Package($host, 'screen', $provider);
+        $pkg = new Package($host, 'nginx', $provider);
         assert(!$pkg->is_installed());
     }
 }
