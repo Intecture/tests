@@ -38,6 +38,7 @@ export LIBRARY_PATH=/usr/local/lib
 export LD_LIBRARY_PATH=/usr/local/lib
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 export PATH=$PATH:/usr/local/bin
+export RUST_BACKTRACE=1
 
 # Install ZMQ
 cd /tmp
