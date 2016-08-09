@@ -26,6 +26,8 @@ case $1 in
 
     freebsd )
         env ASSUME_ALWAYS_YES=YES sudo pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php56 curl gnupg
+        cp /usr/local/etc/php.ini-development /usr/local/etc/php.ini
+        echo "extension=inapi.so" >> /usr/local/etc/php.ini
         ;;
 
     ubuntu )
@@ -40,27 +42,34 @@ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 export PATH=$PATH:/usr/local/bin
 export RUST_BACKTRACE=1
 
-# Install ZMQ
 cd /var/tmp
-curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz
-curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz.sig
-curl -sSOL https://download.libsodium.org/jedi.gpg.asc
-gpg --import jedi.gpg.asc
-gpg --verify libsodium-1.0.8.tar.gz.sig libsodium-1.0.8.tar.gz
-tar zxf libsodium-1.0.8.tar.gz
-cd libsodium-1.0.8
-./configure && make && make install || exit 1
-cd ..
 
-curl -sSOL https://github.com/zeromq/zeromq4-1/archive/v4.1.4.tar.gz
-tar zxf v4.1.4.tar.gz
-cd zeromq4-1-4.1.4
-./autogen.sh && ./configure --with-libsodium && make && make install || exit 1
-cd ..
+# Install ZMQ
+if [ ! -d libsodium-1.0.8 ]; then
+    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz
+    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz.sig
+    curl -sSOL https://download.libsodium.org/jedi.gpg.asc
+    gpg --import jedi.gpg.asc
+    gpg --verify libsodium-1.0.8.tar.gz.sig libsodium-1.0.8.tar.gz
+    tar zxf libsodium-1.0.8.tar.gz
+    cd libsodium-1.0.8
+    ./configure && make && make install || exit 1
+    cd ..
+fi
 
-git clone https://github.com/zeromq/czmq
-cd czmq
-./autogen.sh && ./configure && make && make install || exit 1
+if [ ! -d zeromq4-1-4.1.4 ]; then
+    curl -sSOL https://github.com/zeromq/zeromq4-1/archive/v4.1.4.tar.gz
+    tar zxf v4.1.4.tar.gz
+    cd zeromq4-1-4.1.4
+    ./autogen.sh && ./configure --with-libsodium && make && make install || exit 1
+    cd ..
+fi
+
+if [ ! -d czmq ]; then
+    git clone https://github.com/zeromq/czmq
+    cd czmq
+    ./autogen.sh && ./configure && make && make install || exit 1
+fi
 
 # Install Rust
 curl https://sh.rustup.rs -sSf | sh -s -- -y
