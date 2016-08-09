@@ -3,7 +3,7 @@
 use Intecture\Host;
 
 interface Testable {
-    function test($host);
+    public static function test($host);
 }
 
 assert_options(ASSERT_ACTIVE, true);

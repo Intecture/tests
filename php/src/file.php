@@ -4,9 +4,7 @@ use Intecture\File;
 use Intecture\Telemetry;
 
 class FileTest implements Testable {
-    private $host;
-
-    public function test($host) {
+    public static function test($host) {
         $tempdir = tempnam(sys_get_temp_dir(), '');
         unlink($tempdir);
         mkdir($tempdir);

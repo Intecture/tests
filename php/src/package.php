@@ -7,9 +7,7 @@ use Intecture\Providers;
 use Intecture\Telemetry;
 
 class PackageTest implements Testable {
-    private $host;
-
-    public function test($host) {
+    public static function test($host) {
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
 

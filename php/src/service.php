@@ -6,9 +6,7 @@ use Intecture\ServiceRunnable;
 use Intecture\Telemetry;
 
 class ServiceTest implements Testable {
-    private $host;
-
-    public function test($host) {
+    public static function test($host) {
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
 

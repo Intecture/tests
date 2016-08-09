@@ -3,9 +3,7 @@
 use Intecture\Telemetry;
 
 class TelemetryTest implements Testable {
-    private $host;
-
-    public function test($host) {
+    public static function test($host) {
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
         $out = $exit = NULL;

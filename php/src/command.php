@@ -3,9 +3,7 @@
 use Intecture\Command;
 
 class CommandTest implements Testable {
-    private $host;
-
-    public function test($host) {
+    public static function test($host) {
         $whoami = new Command('whoami');
         $result = $whoami->exec($host);
         assert($result['exit_code'] == 0);
