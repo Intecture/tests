@@ -28,6 +28,10 @@ main() {
 
     prepare || exit 1
 
+    # Remove Rust test's Cargo.lock to avoid locking to a specific
+    # API version.
+    rm -f /vagrant/rust/Cargo.lock
+
     # Full stack tests
     helper_run vagrant rust || exit 1
     # helper_run vagrant c || exit 1
