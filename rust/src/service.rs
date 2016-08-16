@@ -22,7 +22,7 @@ impl Testable for ServiceTest {
 
         let service = Service::new_service(ServiceRunnable::Service("nginx"), None);
 
-        let enable = service.action(&mut host, "enable").unwrap();
+        let enable = service.action(&mut host, "enable").unwrap().unwrap();
         assert_eq!(enable.exit_code, 0);
         match telemetry.os.platform.as_ref() {
             "centos" => {
@@ -44,17 +44,26 @@ impl Testable for ServiceTest {
             _ => unimplemented!()
         }
 
-        let start = service.action(&mut host, "start").unwrap();
+        let enable = service.action(&mut host, "enable").unwrap();
+        assert!(enable.is_none());
+
+        let start = service.action(&mut host, "start").unwrap().unwrap();
         assert_eq!(start.exit_code, 0);
         let start_cmd = Command::new("pgrep").arg("nginx").output().unwrap();
         assert!(start_cmd.status.success());
 
-        let stop = service.action(&mut host, "stop").unwrap();
+        let start = service.action(&mut host, "start").unwrap();
+        assert!(start.is_none());
+
+        let stop = service.action(&mut host, "stop").unwrap().unwrap();
         assert_eq!(stop.exit_code, 0);
         let stop_cmd = Command::new("pgrep").arg("nginx").output().unwrap();
         assert_eq!(stop_cmd.status.code().unwrap(), 1);
 
-        let disable = service.action(&mut host, "disable").unwrap();
+        let stop = service.action(&mut host, "stop").unwrap();
+        assert!(stop.is_none());
+
+        let disable = service.action(&mut host, "disable").unwrap().unwrap();
         assert_eq!(disable.exit_code, 0);
         match telemetry.os.platform.as_ref() {
             "centos" => {
@@ -75,6 +84,9 @@ impl Testable for ServiceTest {
             }
             _ => unimplemented!()
         }
+
+        let disable = service.action(&mut host, "disable").unwrap();
+        assert!(disable.is_none());
 
         let mut pkg = Package::new(&mut host, "nginx", None).unwrap();
         if let PackageResult::Result(cmd) = pkg.uninstall(&mut host).unwrap() {

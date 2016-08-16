@@ -52,17 +52,23 @@ class ServiceTest implements Testable {
         $check_enable = exec($cmd, $out, $exit);
         assert($exit == 0);
 
+        assert($svc->action($host, 'map-enable') === NULL);
+
         $result = $svc->action($host, 'start');
         assert($result['exit_code'] == 0);
         $out = $exit = NULL;
         $check_start = exec('pgrep nginx', $out, $exit);
         assert($exit == 0);
 
+        assert($svc->action($host, 'start') === NULL);
+
         $result = $svc->action($host, 'stop');
         assert($result['exit_code'] == 0);
         $out = $exit = NULL;
         $check_start = exec('pgrep nginx', $out, $exit);
         assert($exit == 1);
+
+        assert($svc->action($host, 'stop') === NULL);
 
         assert($svc->action($host, 'disable'));
         $cmd = '';
@@ -90,5 +96,10 @@ class ServiceTest implements Testable {
         }
         $check_enable = exec($cmd, $out, $exit);
         assert($exit == $expect);
+
+        assert($svc->action($host, 'disable') === NULL);
+
+        $result = $pkg->uninstall($host);
+        assert($result['exit_code'] == 0);
     }
 }
