@@ -28,7 +28,9 @@ class ServiceTest implements Testable {
         $svc = new Service($runnable, array('map-enable' => 'enable'));
 
         $result = $svc->action($host, 'map-enable');
-        assert($result['exit_code'] == 0);
+        if ($result !== NULL) {
+            assert($result['exit_code'] == 0);
+        }
         $cmd = '';
         $out = $exit = NULL;
         switch ($tdata['os']['platform']) {
@@ -55,22 +57,23 @@ class ServiceTest implements Testable {
         assert($svc->action($host, 'map-enable') === NULL);
 
         $result = $svc->action($host, 'start');
-        assert($result['exit_code'] == 0);
+        if ($result !== NULL) {
+            assert($result['exit_code'] == 0);
+        }
         $out = $exit = NULL;
         $check_start = exec('pgrep nginx', $out, $exit);
         assert($exit == 0);
 
         assert($svc->action($host, 'start') === NULL);
 
-        $result = $svc->action($host, 'stop');
-        assert($result['exit_code'] == 0);
+        assert($svc->action($host, 'stop')['exit_code'] == 0);
         $out = $exit = NULL;
         $check_start = exec('pgrep nginx', $out, $exit);
         assert($exit == 1);
 
         assert($svc->action($host, 'stop') === NULL);
 
-        assert($svc->action($host, 'disable'));
+        assert($svc->action($host, 'disable')['exit_code'] == 0);
         $cmd = '';
         $out = $exit = NULL;
         $expect = 0;

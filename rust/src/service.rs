@@ -22,8 +22,9 @@ impl Testable for ServiceTest {
 
         let service = Service::new_service(ServiceRunnable::Service("nginx"), None);
 
-        let enable = service.action(&mut host, "enable").unwrap().unwrap();
-        assert_eq!(enable.exit_code, 0);
+        if let Some(enable) = service.action(&mut host, "enable").unwrap() {
+            assert_eq!(enable.exit_code, 0);
+        }
         match telemetry.os.platform.as_ref() {
             "centos" => {
                 let cmd = Command::new("bash").args(&["-c", "chkconfig|egrep -qs 'nginx.+3:on'"]).output().unwrap();
@@ -47,8 +48,9 @@ impl Testable for ServiceTest {
         let enable = service.action(&mut host, "enable").unwrap();
         assert!(enable.is_none());
 
-        let start = service.action(&mut host, "start").unwrap().unwrap();
-        assert_eq!(start.exit_code, 0);
+        if let Some(start) = service.action(&mut host, "start").unwrap() {
+            assert_eq!(start.exit_code, 0);
+        }
         let start_cmd = Command::new("pgrep").arg("nginx").output().unwrap();
         assert!(start_cmd.status.success());
 
