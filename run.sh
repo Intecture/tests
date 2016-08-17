@@ -129,6 +129,8 @@ install_api() {
         ln -s /etc/php5/mods-available/inapi.ini /etc/php5/cli/conf.d/20-inapi.ini
     elif [ -f /usr/local/etc/php/extensions.ini ]; then
         echo 'extension=inapi.so' >> /usr/local/etc/php/extensions.ini
+    elif [ -f /usr/local/etc/php.ini ]; then
+        echo "extension=inapi.so" >> /usr/local/etc/php.ini
     fi
 
     cd ..
@@ -148,6 +150,9 @@ remove_api() {
     elif [ -f /usr/local/etc/php/extensions.ini ]; then
         sed 's/extension=inapi.so//' </usr/local/etc/php/extensions.ini >extensions.ini.new
         mv extensions.ini.new /usr/local/etc/php/extensions.ini
+    elif [ -f /usr/local/etc/php.ini ]; then
+        sed 's/extension=inapi.so//' </usr/local/etc/php.ini >php.ini.new
+        mv php.ini.new /usr/local/etc/php.ini
     fi
 }
 
