@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
   config.vm.define "centos" do |centos|
-    centos.vm.box = "bento/centos-6.7"
+    centos.vm.box = "centos/6"
     centos.vm.network :private_network, ip: "192.168.178.42"
     centos.ssh.forward_agent = true
     centos.vm.synced_folder "../", "/intecture", type: "nfs"
