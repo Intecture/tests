@@ -1,6 +1,7 @@
 <?php
 
 use Intecture\Directory;
+use Intecture\DirectoryException;
 use Intecture\Telemetry;
 
 class DirectoryTest implements Testable {
@@ -12,8 +13,26 @@ class DirectoryTest implements Testable {
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
 
+        try {
+            $e = false;
+            new Directory($host, "/etc/hosts");
+        } catch (DirectoryException $e) {
+            $e = true;
+        } finally {
+            assert($e);
+        }
+
         $dir = new Directory($host, $tempdir . '/path/to/dir');
         assert(!$dir->exists($host));
+
+        try {
+            $e = false;
+            $dir->create($host);
+        } catch (DirectoryException $e) {
+            $e = true;
+        } finally {
+            assert($e);
+        }
 
         $dir->create($host, array(Directory::OPT_DO_RECURSIVE));
         $out = $exit = NULL;
@@ -60,6 +79,16 @@ class DirectoryTest implements Testable {
         $out = $exit = NULL;
         exec("touch $tempdir/path/to/mv_dir/test", $out, $exit);
         assert($exit == 0);
+
+        try {
+            $e = false;
+            $dir->delete($host);
+        } catch (DirectoryException $e) {
+            $e = true;
+        } finally {
+            assert($e);
+        }
+
         $dir->delete($host, array(Directory::OPT_DO_RECURSIVE));
         $out = $exit = NULL;
         exec("ls $tempdir/path/to/mv_dir 2>&1", $out, $exit);

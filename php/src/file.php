@@ -1,6 +1,7 @@
 <?php
 
 use Intecture\File;
+use Intecture\FileException;
 use Intecture\Telemetry;
 
 class FileTest implements Testable {
@@ -11,6 +12,15 @@ class FileTest implements Testable {
 
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
+
+        try {
+            $e = false;
+            new File($host, "/etc");
+        } catch (FileException $e) {
+            $e = true;
+        } finally {
+            assert($e);
+        }
 
         $file = new File($host, $tempdir . '/remote');
         assert(!$file->exists($host));

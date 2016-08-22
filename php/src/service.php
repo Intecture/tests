@@ -66,14 +66,16 @@ class ServiceTest implements Testable {
 
         assert($svc->action($host, 'start') === NULL);
 
-        assert($svc->action($host, 'stop')['exit_code'] == 0);
+        $result = $svc->action($host, 'stop');
+        assert($result['exit_code'] == 0);
         $out = $exit = NULL;
         $check_start = exec('pgrep nginx', $out, $exit);
         assert($exit == 1);
 
         assert($svc->action($host, 'stop') === NULL);
 
-        assert($svc->action($host, 'disable')['exit_code'] == 0);
+        $result = $svc->action($host, 'disable');
+        assert($result['exit_code'] == 0);
         $cmd = '';
         $out = $exit = NULL;
         $expect = 0;

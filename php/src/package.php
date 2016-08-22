@@ -2,6 +2,7 @@
 
 use Intecture\Host;
 use Intecture\Package;
+use Intecture\PackageException;
 use Intecture\PackageResult;
 use Intecture\Providers;
 use Intecture\Telemetry;
@@ -10,14 +11,6 @@ class PackageTest implements Testable {
     public static function test($host) {
         $telemetry = Telemetry::load($host);
         $tdata = $telemetry->get();
-
-        if ($tdata['os']['platform'] == 'centos') {
-            $epel_pkg = new Package($host, 'epel-release');
-            $result = $epel_pkg->install($host);
-            if ($result !== NULL) {
-                assert($result['exit_code'] == 0);
-            }
-        }
 
         $pkg = new Package($host, "nginx");
         assert(!$pkg->is_installed());
@@ -54,26 +47,41 @@ class PackageTest implements Testable {
 
         assert(!$pkg->is_installed());
 
+        $ok = $bogus = NULL;
         switch ($tdata['os']['platform']) {
-            case 'centos':
-                $provider = Package::PROVIDER_YUM;
+            case "centos":
+                $ok = Package::PROVIDER_YUM;
+                $bogus = Package::PROVIDER_PKG;
                 break;
-            case 'debian':
-            case 'ubuntu':
-                $provider = Package::PROVIDER_APT;
+            case "debian":
+            case "ubuntu":
+                $ok = Package::PROVIDER_APT;
+                $bogus = Package::PROVIDER_HOMEBREW;
                 break;
-            case 'fedora':
-                $provider = Package::PROVIDER_DNF;
+            case "fedora":
+                $ok = Package::PROVIDER_DNF;
+                $bogus = Package::PROVIDER_APT;
                 break;
-            case 'freebsd':
-                $provider = Package::PROVIDER_PKG;
+            case "freebsd":
+                $ok = Package::PROVIDER_PKG;
+                $bogus = Package::PROVIDER_YUM;
                 break;
-            case 'macos':
-                $provider = Package::PROVIDER_HOMEBREW;
+            case "macos":
+                $ok = Package::PROVIDER_HOMEBREW;
+                $break = Package::PROVIDER_DNF;
                 break;
-        }
+        };
 
-        $pkg = new Package($host, 'nginx', $provider);
+        $pkg = new Package($host, 'nginx', $ok);
         assert(!$pkg->is_installed());
+
+        try {
+            $e = false;
+            new Package($host, 'nginx', $bogus);
+        } catch (PackageException $e) {
+            $e = true;
+        } finally {
+            assert($e);
+        }
     }
 }
