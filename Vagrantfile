@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "fedora" do |fedora|
-    fedora.vm.box = "box-cutter/fedora22"
+    fedora.vm.box = "fedora/24-atomic-host"
     fedora.vm.network :private_network, ip: "192.168.178.45"
     fedora.ssh.forward_agent = true
     fedora.vm.synced_folder "../", "/intecture", type: "nfs"
