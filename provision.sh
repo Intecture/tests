@@ -10,8 +10,10 @@
 # Install package dependencies
 case $1 in
     centos )
+        rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+        rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
         yum update -y
-        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php-devel
+        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php55w-devel
         ;;
 
     debian )

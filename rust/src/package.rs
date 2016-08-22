@@ -7,13 +7,6 @@ impl Testable for PackageTest {
     fn test(mut host: &mut Host) {
         let telemetry = Telemetry::init(&mut host).unwrap();
 
-        if telemetry.os.platform == "centos" {
-            let mut pkg_epel = Package::new(&mut host, "epel-release", None).unwrap();
-            if let PackageResult::Result(cmd) = pkg_epel.install(&mut host).unwrap() {
-                assert_eq!(cmd.exit_code, 0);
-            }
-        }
-
         let mut pkg = Package::new(&mut host, "nginx", None).unwrap();
         assert!(!pkg.is_installed());
         if let PackageResult::Result(cmd) = pkg.install(&mut host).unwrap() {
