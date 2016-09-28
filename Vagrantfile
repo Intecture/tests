@@ -23,8 +23,16 @@ Vagrant.configure("2") do |config|
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
 
+  config.vm.define "debian-legacy" do |debian|
+    debian.vm.box = "debian/wheezy64"
+    debian.vm.network :private_network, ip: "192.168.178.47"
+    debian.ssh.forward_agent = true
+    debian.vm.synced_folder "../", "/intecture", type: "nfs"
+    debian.vm.provision "shell", path: "provision.sh", args: "debian"
+  end
+
   config.vm.define "fedora" do |fedora|
-    fedora.vm.box = "fedora/24-atomic-host"
+    fedora.vm.box = "box-cutter/fedora24"
     fedora.vm.network :private_network, ip: "192.168.178.45"
     fedora.ssh.forward_agent = true
     fedora.vm.synced_folder "../", "/intecture", type: "nfs"
