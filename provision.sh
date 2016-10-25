@@ -27,7 +27,9 @@ case $1 in
         ;;
 
     freebsd )
-        env ASSUME_ALWAYS_YES=YES sudo pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php56 curl gnupg
+        pkg update -f && pkg check -Ba
+        pkg upgrade -y
+        pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php56 curl gnupg
         cp /usr/local/etc/php.ini-development /usr/local/etc/php.ini
         ;;
 
