@@ -1,0 +1,14 @@
+{
+    "hostname": "localhost",
+    "api_port": 7101,
+    "file_port": 7102,
+    "_include": [
+        "payload: rust/command",
+        "payload: rust/data",
+        "payload: rust/directory",
+        "payload: rust/file",
+        "payload: php/package",
+        "payload: php/payload",
+        "payload: php/service",
+    ]
+}

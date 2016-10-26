@@ -20,7 +20,7 @@ main() {
     mkdir -p $install_dir
     cd $install_dir
 
-    # Build/test/install Intecture
+    # Build/unit test/install Intecture
     install_api || exit 1
     helper_run intecture agent || exit 1
     helper_run intecture auth || exit 1
@@ -28,33 +28,27 @@ main() {
 
     prepare || exit 1
 
-    # Remove Rust test's Cargo.lock to avoid locking to a specific
-    # API version.
-    rm -f /vagrant/rust/Cargo.lock
-
     # Full stack tests
-    helper_run vagrant rust || exit 1
-    # helper_run vagrant c || exit 1
-    helper_run vagrant php || exit 1
+    run || exit 1
 
-    remove_api || exit 1
-    helper_remove intecture agent || exit 1
-    helper_remove intecture auth || exit 1
-    helper_remove intecture cli || exit 1
-    rm -rf /usr/local/etc/intecture
-    rm -rf "$install_dir/*"
-
-    helper_pkg intecture agent || exit 1
-    helper_pkg intecture api --with=php || exit 1
-    helper_pkg intecture auth || exit 1
-    helper_pkg intecture cli || exit 1
-
-    prepare || exit 1
-
-    # Full stack tests
-    helper_run vagrant rust || exit 1
-    # helper_run vagrant c || exit 1
-    helper_run vagrant php || exit 1
+    # remove_api || exit 1
+    # helper_remove intecture agent || exit 1
+    # helper_remove intecture auth || exit 1
+    # helper_remove intecture cli || exit 1
+    # rm -rf /usr/local/etc/intecture
+    # rm -rf "$install_dir/*"
+    #
+    # helper_pkg intecture agent || exit 1
+    # helper_pkg intecture api --with=php || exit 1
+    # helper_pkg intecture auth || exit 1
+    # helper_pkg intecture cli || exit 1
+    #
+    # prepare || exit 1
+    #
+    # # Full stack tests
+    # helper_run vagrant rust || exit 1
+    # # helper_run vagrant c || exit 1
+    # helper_run vagrant php || exit 1
 }
 
 prepare() {
@@ -104,6 +98,61 @@ prepare() {
     echo "done"
 }
 
+run() {
+    incli project init rust rust || return 1
+    cd rust
+
+    cp /vagrant/data/rust.json data/hosts/
+    cp -PR /vagrant/payloads/php/command payloads/
+    cp -PR /vagrant/payloads/php/data payloads/
+    cp -PR /vagrant/payloads/php/directory payloads/
+    cp -PR /vagrant/payloads/php/file payloads/
+    cp -PR /vagrant/payloads/php/payload_missingdep payloads/
+    cp -PR /vagrant/payloads/php/payload_nested payloads/
+    cp -PR /vagrant/payloads/rust/package payloads/
+    cp -PR /vagrant/payloads/rust/payload payloads/
+    cp -PR /vagrant/payloads/rust/service payloads/
+    cp -PR /vagrant/payloads/rust/template payloads/
+    incli payload build || return 1
+
+    sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+    mv project.json.new project.json
+    cp "$install_dir/user.crt" .
+	cp /usr/local/etc/intecture/auth.crt_public auth.crt
+    sed "s/intecture-api = .+/intecture-api = { path = \"$install_dir/api\" }/" Cargo.toml > Cargo.toml.new
+	mv Cargo.toml.new Cargo.toml
+
+    incli run rust || return 1
+    cd ..
+
+    incli project init php php || return 1
+    cd php
+
+    cp /vagrant/data/php.json data/hosts/
+    cp -PR /vagrant/payloads/rust/command payloads/
+    cp -PR /vagrant/payloads/rust/data payloads/
+    cp -PR /vagrant/payloads/rust/directory payloads/
+    cp -PR /vagrant/payloads/rust/file payloads/
+    cp -PR /vagrant/payloads/php/package payloads/
+    cp -PR /vagrant/payloads/php/payload payloads/
+    cp -PR /vagrant/payloads/php/payload_missingdep payloads/
+    cp -PR /vagrant/payloads/php/payload_nested payloads/
+    cp -PR /vagrant/payloads/php/service payloads/
+    cp -PR /vagrant/payloads/php/template payloads/
+    incli payload build || return 1
+
+    sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+    mv project.json.new project.json
+    cp "$install_dir/user.crt" .
+	cp /usr/local/etc/intecture/auth.crt_public auth.crt
+
+    incli run php || return 1
+    cd ..
+
+    echo "ALL TESTS PASSED. RRAAAAAWWWW!";
+    cat /vagrant/homer.ascii
+}
+
 install_api() {
     echo -n "Run api..."
     helper_copy intecture api || return 0
@@ -115,8 +164,8 @@ install_api() {
     # C binding
     install bindings/c/inapi.h /usr/local/include
 
-    # PHP binding
-    cd bindings/php
+    # PHP 7 binding
+    cd bindings/php7
     helper_make
     helper_make install test || return 1
     cd ../..
@@ -124,9 +173,9 @@ install_api() {
     # Create module ini file
     if [ -d /etc/php.d ]; then
         echo 'extension=inapi.so' > /etc/php.d/inapi.ini
-    elif [ -d /etc/php5 ]; then
-        echo 'extension=inapi.so' > /etc/php5/mods-available/inapi.ini
-        ln -s /etc/php5/mods-available/inapi.ini /etc/php5/cli/conf.d/20-inapi.ini
+    elif [ -d /etc/php7 ]; then
+        echo 'extension=inapi.so' > /etc/php7/mods-available/inapi.ini
+        ln -s /etc/php7/mods-available/inapi.ini /etc/php7/cli/conf.d/20-inapi.ini
     elif [ -f /usr/local/etc/php/extensions.ini ]; then
         echo 'extension=inapi.so' >> /usr/local/etc/php/extensions.ini
     elif [ -f /usr/local/etc/php.ini ]; then
@@ -145,8 +194,8 @@ remove_api() {
 
     if [ -d /etc/php.d ]; then
         rm -f /etc/php.d/inapi.ini
-    elif [ -d /etc/php5 ]; then
-        rm -f /etc/php5/mods-available/inapi.ini /etc/php5/cli/conf.d/20-inapi.ini
+    elif [ -d /etc/php7 ]; then
+        rm -f /etc/php7/mods-available/inapi.ini /etc/php7/cli/conf.d/20-inapi.ini
     elif [ -f /usr/local/etc/php/extensions.ini ]; then
         sed 's/extension=inapi.so//' </usr/local/etc/php/extensions.ini >extensions.ini.new
         mv extensions.ini.new /usr/local/etc/php/extensions.ini

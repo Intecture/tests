@@ -13,29 +13,29 @@ case $1 in
         rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
         rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
         yum update -y
-        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php55w-devel
+        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70w-devel
         ;;
 
     debian )
         apt-get update -y
-        apt-get -y install git build-essential pkg-config curl php5-dev
+        apt-get -y install git build-essential pkg-config curl php7-dev
         ;;
 
     fedora )
         dnf update -y
-        dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php-devel
+        dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70-devel
         ;;
 
     freebsd )
         pkg update -f && pkg check -Ba
         pkg upgrade -y
-        pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php56 curl gnupg
+        pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php70 curl gnupg
         cp /usr/local/etc/php.ini-development /usr/local/etc/php.ini
         ;;
 
     ubuntu )
         apt-get update -y
-        apt-get -y install git build-essential pkg-config curl php5-dev
+        apt-get -y install git build-essential pkg-config curl php7-dev
         ;;
 esac
 
@@ -48,22 +48,22 @@ export RUST_BACKTRACE=1
 cd /var/tmp
 
 # Install ZMQ
-if [ ! -d libsodium-1.0.8 ]; then
-    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz
-    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.8.tar.gz.sig
+if [ ! -d libsodium-1.0.11 ]; then
+    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.11.tar.gz
+    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.11.tar.gz.sig
     curl -sSOL https://download.libsodium.org/jedi.gpg.asc
     gpg --import jedi.gpg.asc
-    gpg --verify libsodium-1.0.8.tar.gz.sig libsodium-1.0.8.tar.gz
-    tar zxf libsodium-1.0.8.tar.gz
-    cd libsodium-1.0.8
+    gpg --verify libsodium-1.0.11.tar.gz.sig libsodium-1.0.11.tar.gz
+    tar zxf libsodium-1.0.11.tar.gz
+    cd libsodium-1.0.11
     ./configure && make && make install || exit 1
     cd ..
 fi
 
-if [ ! -d zeromq4-1-4.1.4 ]; then
-    curl -sSOL https://github.com/zeromq/zeromq4-1/archive/v4.1.4.tar.gz
-    tar zxf v4.1.4.tar.gz
-    cd zeromq4-1-4.1.4
+if [ ! -d zeromq4-1-4.1.5 ]; then
+    curl -sSOL https://github.com/zeromq/zeromq4-1/archive/v4.1.5.tar.gz
+    tar zxf v4.1.5.tar.gz
+    cd zeromq4-1-4.1.5
     ./autogen.sh && ./configure --with-libsodium && make && make install || exit 1
     cd ..
 fi

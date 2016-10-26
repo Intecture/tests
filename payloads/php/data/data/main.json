@@ -1,0 +1,13 @@
+{
+    "data": {
+        "null": null,
+        "bool": true,
+        "int": -123,
+        "double": 1.1,
+        "str": "This is a string",
+        "array": [ 1, "two", 3 ],
+        "obj": {
+            "nested": "Boo!"
+        }
+    }
+}

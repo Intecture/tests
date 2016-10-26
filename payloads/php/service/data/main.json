@@ -1,0 +1,58 @@
+{
+    "service": {
+        "check_on?": [
+            {
+                "?": "/_telemetry/os/platform = 'centos'",
+                "_": "chkconfig|egrep -qs 'nginx.+3:on'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'fedora'",
+                "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+enabled'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'debian' ||
+                      /_telemetry/os/platform = 'ubuntu'",
+                "_": "ls /etc/rc3.d|egrep -qs 'S[0-9]+nginx'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'freebsd'",
+                "_": "grep -qs 'nginx_enable=\"YES\"' /etc/rc.conf"
+            },
+            {
+                "_": "Unknown platform!"
+            }
+        ],
+        "check_off?": [
+            {
+                "?": "/_telemetry/os/platform = 'centos'",
+                "_": "chkconfig|egrep -qs 'nginx.+3:off'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'fedora'",
+                "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+disabled'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'debian' ||
+                      /_telemetry/os/platform = 'ubuntu'",
+                "_": "ls /etc/rc3.d|egrep -qs 'S[0-9]+nginx'"
+            },
+            {
+                "?": "/_telemetry/os/platform = 'freebsd'",
+                "_": "grep -qs 'nginx_enable=\"YES\"' /etc/rc.conf"
+            },
+            {
+                "_": "Unknown platform!"
+            }
+        ],
+        "check_off_expect?": [
+            {
+                "?": "/_telemetry/os/platform = 'centos' ||
+                      /_telemetry/os/platform = 'fedora'",
+                "_": 0
+            },
+            {
+                "_": 1
+            }
+        ]
+    }
+}
