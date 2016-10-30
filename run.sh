@@ -67,9 +67,10 @@ prepare() {
     sed 's/7102/7104/' <auth.json.tmp >/usr/local/etc/intecture/auth.json
     if pgrep inauth; then
         echo -n "restarting..."
-        pkill -9 inauth
+        service inauth restart
+    else
+        service inauth start
     fi
-    inauth &
     echo "done"
 
     # Bootstrap Agent
@@ -77,7 +78,7 @@ prepare() {
     if [ -d "agent_bootstrap" ]; then
         echo "ignored"
     else
-        incli init agent_bootstrap rust || return 1
+        incli project init agent_bootstrap rust || return 1
         cp user.crt agent_bootstrap/
         cp /usr/local/etc/intecture/auth.crt_public agent_bootstrap/auth.crt
         cd agent_bootstrap
@@ -86,68 +87,94 @@ prepare() {
         incli host add -s localhost || return 1
         cp localhost.crt /usr/local/etc/intecture/agent.crt
         echo "done"
+        cd ..
     fi
 
     # Start Agent daemon
     echo -n "Starting agent..."
     if pgrep inagent; then
-       echo -n "restarting..."
-       pkill -9 inagent
+        echo -n "restarting..."
+        service inagent restart
+    else
+        service inagent start
     fi
-    inagent &
     echo "done"
 }
 
 run() {
-    incli project init rust rust || return 1
-    cd rust
+    if [ ! -d rust ]; then
+        incli project init rust rust || return 1
+        cd rust
 
-    cp /vagrant/data/rust.json data/hosts/
-    cp -PR /vagrant/payloads/php/command payloads/
-    cp -PR /vagrant/payloads/php/data payloads/
-    cp -PR /vagrant/payloads/php/directory payloads/
-    cp -PR /vagrant/payloads/php/file payloads/
-    cp -PR /vagrant/payloads/php/payload_missingdep payloads/
-    cp -PR /vagrant/payloads/php/payload_nested payloads/
-    cp -PR /vagrant/payloads/rust/package payloads/
-    cp -PR /vagrant/payloads/rust/payload payloads/
-    cp -PR /vagrant/payloads/rust/service payloads/
-    cp -PR /vagrant/payloads/rust/template payloads/
-    incli payload build || return 1
+        cp /vagrant/data.json data/hosts/localhost.json
+        cp -PR /vagrant/payloads/rust/package payloads/
 
-    sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
-    mv project.json.new project.json
-    cp "$install_dir/user.crt" .
-	cp /usr/local/etc/intecture/auth.crt_public auth.crt
-    sed "s/intecture-api = .+/intecture-api = { path = \"$install_dir/api\" }/" Cargo.toml > Cargo.toml.new
-	mv Cargo.toml.new Cargo.toml
+        # Build one project, then copy target/ to save time
+        incli payload build package || return 1
 
-    incli run rust || return 1
-    cd ..
+        cp -PR /vagrant/payloads/php/command payloads/
+        cp -PR /vagrant/payloads/php/data payloads/
+        cp -PR /vagrant/payloads/php/directory payloads/
+        cp -PR /vagrant/payloads/php/file payloads/
+        cp -PR /vagrant/payloads/rust/service payloads/
+        cp -PR /vagrant/payloads/rust/template payloads/
+        cp -PR payloads/package/target payloads/service/
+        cp -PR payloads/package/target payloads/template/
 
-    incli project init php php || return 1
-    cd php
+        incli payload build || return 1
 
-    cp /vagrant/data/php.json data/hosts/
-    cp -PR /vagrant/payloads/rust/command payloads/
-    cp -PR /vagrant/payloads/rust/data payloads/
-    cp -PR /vagrant/payloads/rust/directory payloads/
-    cp -PR /vagrant/payloads/rust/file payloads/
-    cp -PR /vagrant/payloads/php/package payloads/
-    cp -PR /vagrant/payloads/php/payload payloads/
-    cp -PR /vagrant/payloads/php/payload_missingdep payloads/
-    cp -PR /vagrant/payloads/php/payload_nested payloads/
-    cp -PR /vagrant/payloads/php/service payloads/
-    cp -PR /vagrant/payloads/php/template payloads/
-    incli payload build || return 1
+        # Copy this after building, or the build will fail
+        cp -PR /vagrant/payloads/rust/payload payloads/
+        cp -PR payloads/package/target payloads/payload/
+        cp -PR /vagrant/payloads/php/payload_nested payloads/
+        cp -PR /vagrant/payloads/php/payload_missingdep payloads/
 
-    sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
-    mv project.json.new project.json
-    cp "$install_dir/user.crt" .
-	cp /usr/local/etc/intecture/auth.crt_public auth.crt
+        sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+        mv project.json.new project.json
+        cp "$install_dir/user.crt" .
+        cp /usr/local/etc/intecture/auth.crt_public auth.crt
+        sed "s~intecture-api = .*~intecture-api = { path = \"$install_dir/api\" }~" Cargo.toml > Cargo.toml.new
+        mv Cargo.toml.new Cargo.toml
 
-    incli run php || return 1
-    cd ..
+        incli run localhost || return 1
+        cd ..
+    fi
+
+    if [ ! -d php ]; then
+        incli project init php php || return 1
+        cd php
+
+        cp /vagrant/data.json data/hosts/localhost.json
+        cp -PR /vagrant/payloads/rust/command payloads/
+
+        # Build one project, then copy target/ to save time
+        incli payload build command || return 1
+
+        cp -PR /vagrant/payloads/rust/data payloads/
+        cp -PR /vagrant/payloads/rust/directory payloads/
+        cp -PR /vagrant/payloads/rust/file payloads/
+        cp -PR /vagrant/payloads/php/package payloads/
+        cp -PR /vagrant/payloads/php/service payloads/
+        cp -PR /vagrant/payloads/php/template payloads/
+        cp -PR payloads/command/target payloads/data/
+        cp -PR payloads/command/target payloads/directory/
+        cp -PR payloads/command/target payloads/file/
+
+        incli payload build || return 1
+
+        # Copy this after building, or the build will fail
+        cp -PR /vagrant/payloads/php/payload payloads/
+        cp -PR /vagrant/payloads/php/payload_nested payloads/
+        cp -PR /vagrant/payloads/php/payload_missingdep payloads/
+
+        sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+        mv project.json.new project.json
+        cp "$install_dir/user.crt" .
+        cp /usr/local/etc/intecture/auth.crt_public auth.crt
+
+        incli run localhost || return 1
+        cd ..
+    fi
 
     echo "ALL TESTS PASSED. RRAAAAAWWWW!";
     cat /vagrant/homer.ascii
