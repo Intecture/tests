@@ -11,9 +11,7 @@ if ($argc < 3) {
     exit(1);
 }
 
-echo 'Connecting to host...';
 $host = Host::connect_payload($argv[1], $argv[2]);
-echo 'done', PHP_EOL;
 
 assert($argv[3] == 'myarg');
 

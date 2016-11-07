@@ -14,9 +14,7 @@ if ($argc < 2) {
     exit(1);
 }
 
-echo 'Connecting to host...';
 $host = Host::connect_payload($argv[1], $argv[2]);
-echo 'done', PHP_EOL;
 
 $pkg = new Package($host, "nginx");
 assert(!$pkg->is_installed());
