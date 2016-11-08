@@ -1,5 +1,5 @@
 [package]
-name = "command"
+name = "package"
 version = "0.1.0"
 authors = ["Pete Hayes <pete@hayes.id.au>"]
 
