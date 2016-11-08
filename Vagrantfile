@@ -3,6 +3,7 @@ Vagrant.configure("2") do |config|
     centos.vm.box = "centos/6"
     centos.vm.network :private_network, ip: "192.168.178.42"
     centos.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     centos.vm.synced_folder "../", "/intecture", type: "nfs"
     centos.vm.provision "shell", path: "provision.sh", args: "centos"
   end
@@ -11,6 +12,7 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.box = "ubuntu/trusty64"
     ubuntu.vm.network :private_network, ip: "192.168.178.43"
     ubuntu.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     ubuntu.vm.synced_folder "../", "/intecture", type: "nfs"
     ubuntu.vm.provision "shell", path: "provision.sh", args: "ubuntu"
   end
@@ -19,6 +21,7 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/jessie64"
     debian.vm.network :private_network, ip: "192.168.178.44"
     debian.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
@@ -27,6 +30,7 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/wheezy64"
     debian.vm.network :private_network, ip: "192.168.178.47"
     debian.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
@@ -35,6 +39,7 @@ Vagrant.configure("2") do |config|
     fedora.vm.box = "box-cutter/fedora24"
     fedora.vm.network :private_network, ip: "192.168.178.45"
     fedora.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     fedora.vm.synced_folder "../", "/intecture", type: "nfs"
     fedora.vm.provision "shell", path: "provision.sh", args: "fedora"
   end
@@ -43,8 +48,8 @@ Vagrant.configure("2") do |config|
     freebsd.vm.guest = :freebsd
     freebsd.vm.box = "freebsd/FreeBSD-10.2-STABLE"
     freebsd.vm.network :private_network, ip: "192.168.178.46"
-    freebsd.vm.synced_folder "../", "/intecture", id: "vagrant-in", type: "nfs"
     freebsd.vm.synced_folder ".", "/vagrant", id: "vagrant-root", type: "nfs"
+    freebsd.vm.synced_folder "../", "/intecture", id: "vagrant-in", type: "nfs"
     freebsd.vm.provision "shell", path: "provision.sh", args: "freebsd"
     freebsd.vm.base_mac = "080027D14C66"
     freebsd.ssh.shell = "sh"
