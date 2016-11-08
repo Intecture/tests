@@ -1,1 +1,1 @@
-{"author":"me","repository":"https://github.com/<ORG>/command.git","language":"Rust","dependencies":["payload_nested", "payload_missingdep"]}
+{"author":"me","repository":"https://github.com/<ORG>/command.git","language":"Rust","dependencies":["payload_nested"]}
