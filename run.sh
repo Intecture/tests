@@ -106,6 +106,8 @@ run() {
         incli project init rust rust || return 1
         cd rust
 
+        find /vagrant/payloads/rust/ -name Cargo.lock -delete
+
         cp /vagrant/data.json data/hosts/localhost.json
         cp -PR /vagrant/payloads/rust/package payloads/
 

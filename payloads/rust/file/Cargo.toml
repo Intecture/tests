@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Pete Hayes <pete@hayes.id.au>"]
 
 [dependencies]
-intecture-api = { git = "https://github.com/intecture/api", branch = "dev" }
+intecture-api = { path = "../../../api" }
 tempdir = "0.3"
