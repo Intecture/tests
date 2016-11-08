@@ -1,5 +1,6 @@
 <?php
 
+use Intecture\Command;
 use Intecture\Host;
 use Intecture\Payload;
 
