@@ -103,17 +103,22 @@ prepare() {
 
 run() {
     if [ ! -d rust ]; then
+        echo -n "Init Rust project..."
         incli project init rust rust || return 1
         cd rust
+        echo "done"
 
         find /vagrant/payloads/rust/ -name Cargo.lock -delete
 
+        echo -n "Building initial payload..."
         cp /vagrant/data.json data/hosts/localhost.json
         cp -PR /vagrant/payloads/rust/package payloads/
 
         # Build one project, then copy target/ to save time
         incli payload build package || return 1
+        echo "done"
 
+        echo -n "Build remaining payloads..."
         cp -PR /vagrant/payloads/php/command payloads/
         cp -PR /vagrant/payloads/php/data payloads/
         cp -PR /vagrant/payloads/php/directory payloads/
@@ -124,6 +129,7 @@ run() {
         cp -PR payloads/package/target payloads/template/
 
         incli payload build || return 1
+        echo "done"
 
         # Copy this after building, or the build will fail
         cp -PR /vagrant/payloads/rust/payload payloads/
@@ -138,20 +144,27 @@ run() {
         sed "s~intecture-api = .*~intecture-api = { path = \"$install_dir/api\" }~" Cargo.toml > Cargo.toml.new
         mv Cargo.toml.new Cargo.toml
 
+        echo "Run Rust project..."
         incli run localhost || return 1
+
         cd ..
     fi
 
     if [ ! -d php ]; then
+        echo -n "Init PHP project..."
         incli project init php php || return 1
         cd php
+        echo "done"
 
+        echo -n "Building initial payload..."
         cp /vagrant/data.json data/hosts/localhost.json
         cp -PR /vagrant/payloads/rust/command payloads/
 
         # Build one project, then copy target/ to save time
         incli payload build command || return 1
+        echo "done"
 
+        echo -n "Build remaining payloads..."
         cp -PR /vagrant/payloads/rust/data payloads/
         cp -PR /vagrant/payloads/rust/directory payloads/
         cp -PR /vagrant/payloads/rust/file payloads/
@@ -163,6 +176,7 @@ run() {
         cp -PR payloads/command/target payloads/file/
 
         incli payload build || return 1
+        echo "done"
 
         # Copy this after building, or the build will fail
         cp -PR /vagrant/payloads/php/payload payloads/
@@ -174,7 +188,9 @@ run() {
         cp "$install_dir/user.crt" .
         cp /usr/local/etc/intecture/auth.crt_public auth.crt
 
+        echo "Run PHP project..."
         incli run localhost || return 1
+
         cd ..
     fi
 
