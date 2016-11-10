@@ -9,6 +9,7 @@
         "payload: file",
         "payload: package",
         "payload: payload",
-        "payload: service"
+        "payload: service",
+        "payload: template"
     ]
 }
