@@ -43,7 +43,7 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     let mut content = String::new();
     try!(fh.read_to_string(&mut content));
 
-    assert_eq!(content, expected_content);
+    assert_eq!(content.trim(), expected_content);
 
     Ok(())
 }
