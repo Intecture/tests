@@ -20,7 +20,7 @@ mkdir($tempdir);
 
 try {
     $e = false;
-    new Directory($host, "/etc/hosts");
+    new Directory($host, '/etc/hosts');
 } catch (DirectoryException $e) {
     $e = true;
 } finally {
@@ -52,7 +52,7 @@ assert($exit == 0);
 $owner = $dir->get_owner($host);
 assert($owner['user_name'] == 'root');
 assert($owner['user_uid'] == 0);
-assert($owner['group_name'] == ($host->data()['_telemetry']['os']['platform'] == "freebsd" ? 'wheel' : 'root'));
+assert($owner['group_name'] == ($host->data()['_telemetry']['os']['platform'] == 'freebsd' ? 'wheel' : 'root'));
 assert($owner['group_gid'] == 0);
 
 $dir->set_owner($host, 'vagrant', 'vagrant');
