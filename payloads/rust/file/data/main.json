@@ -6,9 +6,7 @@
                 "_": 500
             },
             {
-                "?": "/_telemetry/os/platform = debian ||
-                      /_telemetry/os/platform = fedora ||
-                      /_telemetry/os/platform = ubuntu",
+                "?": "/_telemetry/os/platform = debian || /_telemetry/os/platform = fedora || /_telemetry/os/platform = ubuntu",
                 "_": 1000
             },
             {
