@@ -27,7 +27,7 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
 
     let tempdir = try!(TempDir::new("test_template"));
 
-    let tpl = try!(Template::new("template/tpl/test_conf.tpl"));
+    let tpl = try!(Template::new("payloads/template/tpl/test_conf.tpl"));
     let map = MapBuilder::new()
         .insert_str("name", try!(needstr!(host.data_owned() => "/template/name")))
         .build();
