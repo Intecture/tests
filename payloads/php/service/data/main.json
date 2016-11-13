@@ -10,8 +10,7 @@
                 "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+enabled'"
             },
             {
-                "?": "/_telemetry/os/platform = 'debian' ||
-                      /_telemetry/os/platform = 'ubuntu'",
+                "?": "/_telemetry/os/platform = 'debian' || /_telemetry/os/platform = 'ubuntu'",
                 "_": "ls /etc/rc3.d|egrep -qs 'S[0-9]+nginx'"
             },
             {
@@ -32,8 +31,7 @@
                 "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+disabled'"
             },
             {
-                "?": "/_telemetry/os/platform = 'debian' ||
-                      /_telemetry/os/platform = 'ubuntu'",
+                "?": "/_telemetry/os/platform = 'debian' || /_telemetry/os/platform = 'ubuntu'",
                 "_": "ls /etc/rc3.d|egrep -qs 'S[0-9]+nginx'"
             },
             {
@@ -46,8 +44,7 @@
         ],
         "check_off_expect?": [
             {
-                "?": "/_telemetry/os/platform = 'centos' ||
-                      /_telemetry/os/platform = 'fedora'",
+                "?": "/_telemetry/os/platform = 'centos' || /_telemetry/os/platform = 'fedora'",
                 "_": 0
             },
             {

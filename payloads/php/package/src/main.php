@@ -6,9 +6,6 @@ use Intecture\PackageException;
 use Intecture\PackageResult;
 use Intecture\Providers;
 
-assert_options(ASSERT_ACTIVE, true);
-assert_options(ASSERT_BAIL, true);
-
 if ($argc < 2) {
     echo 'Missing Host endpoints', PHP_EOL;
     exit(1);
@@ -17,14 +14,14 @@ if ($argc < 2) {
 $host = Host::connect_payload($argv[1], $argv[2]);
 
 $pkg = new Package($host, "nginx");
-assert(!$pkg->is_installed());
+actually_bloody_assert($pkg->is_installed(), false);
 
 $result = $pkg->install($host);
 if ($result === NULL) {
     echo 'Didn\'t install package';
     exit(1);
 } else {
-    assert($result['exit_code'] == 0);
+    actually_bloody_assert($result['exit_code'], 0);
 }
 
 $result = $pkg->install($host);
@@ -33,14 +30,14 @@ if ($result !== NULL) {
     exit(1);
 }
 
-assert($pkg->is_installed());
+actually_bloody_assert($pkg->is_installed(), true);
 
 $result = $pkg->uninstall($host);
 if ($result === NULL) {
     echo 'Didn\'t uninstall package';
     exit(1);
 } else {
-    assert($result['exit_code'] == 0);
+    actually_bloody_assert($result['exit_code'], 0);
 }
 
 $result = $pkg->uninstall($host);
@@ -49,7 +46,7 @@ if ($result !== NULL) {
     exit(1);
 }
 
-assert(!$pkg->is_installed());
+actually_bloody_assert($pkg->is_installed(), false);
 
 $ok = $bogus = NULL;
 switch ($host->data()['_telemetry']['os']['platform']) {
@@ -77,7 +74,7 @@ switch ($host->data()['_telemetry']['os']['platform']) {
 };
 
 $pkg = new Package($host, 'nginx', $ok);
-assert(!$pkg->is_installed());
+actually_bloody_assert($pkg->is_installed(), false);
 
 try {
     $e = false;
@@ -85,5 +82,16 @@ try {
 } catch (PackageException $e) {
     $e = true;
 } finally {
-    assert($e);
+    actually_bloody_assert($e, true);
+}
+
+function actually_bloody_assert($v1, $v2, $ne = false) {
+    if (!$ne && $v1 !== $v2) {
+        echo "Failed assertion: $v1 === $v2", PHP_EOL;
+        exit(1);
+    }
+    else if ($ne && $v1 === $v2) {
+        echo "Failed assertion: $v1 !== $v2", PHP_EOL;
+        exit(1);
+    }
 }
