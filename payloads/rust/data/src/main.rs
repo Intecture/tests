@@ -31,15 +31,18 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     assert_eq!(wantf64!(data => "/data/double"), Some(1.1));
     assert_eq!(wantstr!(data => "/data/str"), Some("This is a string"));
     let mut a = try!(needarray!(data => "/data/array")).iter();
-    assert_eq!(wantu64!(a.next().unwrap()), Some(1));
-    assert_eq!(wantstr!(a.next().unwrap()), Some("two"));
-    assert_eq!(wantu64!(a.next().unwrap()), Some(3));
+    let next = a.next().unwrap();
+    assert_eq!(wantu64!(next), Some(1));
+    let next = a.next().unwrap();
+    assert_eq!(wantstr!(next), Some("two"));
+    let next = a.next().unwrap();
+    assert_eq!(wantu64!(next), Some(3));
     assert_eq!(wantstr!(data => "/data/obj/nested"), Some("Boo!"));
 
     // Telemetry data
     let output = try!(Command::new("hostname").arg("-f").output());
     assert!(output.status.success());
-    assert_eq!(wantstr!(data => "/_telemetry/hostname"), Some(try!(str::from_utf8(&output.stdout))));
+    assert_eq!(wantstr!(data => "/_telemetry/hostname"), Some(try!(str::from_utf8(&output.stdout)).trim()));
 
     Ok(())
 }
