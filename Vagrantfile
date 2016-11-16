@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.box = "ubuntu/trusty64"
     ubuntu.vm.network :private_network, ip: "192.168.178.43"
     ubuntu.ssh.forward_agent = true
-    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
+    ubuntu.vm.synced_folder ".", "/vagrant", type: "nfs"
     ubuntu.vm.synced_folder "../", "/intecture", type: "nfs"
     ubuntu.vm.provision "shell", path: "provision.sh", args: "ubuntu"
   end
@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/jessie64"
     debian.vm.network :private_network, ip: "192.168.178.44"
     debian.ssh.forward_agent = true
-    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
+    debian.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/wheezy64"
     debian.vm.network :private_network, ip: "192.168.178.47"
     debian.ssh.forward_agent = true
-    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
+    debian.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
     fedora.vm.box = "box-cutter/fedora24"
     fedora.vm.network :private_network, ip: "192.168.178.45"
     fedora.ssh.forward_agent = true
-    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
+    fedora.vm.synced_folder ".", "/vagrant", type: "nfs"
     fedora.vm.synced_folder "../", "/intecture", type: "nfs"
     fedora.vm.provision "shell", path: "provision.sh", args: "fedora"
   end
