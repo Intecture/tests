@@ -17,13 +17,19 @@ case $1 in
         ;;
 
     debian )
-        apt-get update -y
-        apt-get -y install git build-essential pkg-config curl php7-dev
+        echo "deb http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
+        echo "deb-src http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
+        wget https://www.dotdeb.org/dotdeb.gpg
+        sudo apt-key add dotdeb.gpg
+        apt-get update
+        apt-get -y install git build-essential pkg-config curl php7.0-dev
         ;;
 
     fedora )
+        wget http://rpms.remirepo.net/fedora/remi-release-24.rpm
+        dnf install -y remi-release-24.rpm
         dnf update -y
-        dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70-devel
+        dnf -y --enablerepo=remi-php70 install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php-devel
         ;;
 
     freebsd )
@@ -34,8 +40,9 @@ case $1 in
         ;;
 
     ubuntu )
-        apt-get update -y
-        apt-get -y install git build-essential pkg-config curl php7-dev
+        add-apt-repository ppa:ondrej/php
+        apt-get update
+        apt-get -y install git build-essential libtool pkg-config curl php7.0-dev
         ;;
 esac
 
