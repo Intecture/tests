@@ -65,6 +65,9 @@ prepare() {
     echo -n "Starting auth daemon..."
     sed 's/7101/7103/' </usr/local/etc/intecture/auth.json >auth.json.tmp
     sed 's/7102/7104/' <auth.json.tmp >/usr/local/etc/intecture/auth.json
+    if [ $os = "freebsd" ] && ! $(grep -qs inauth_enable /etc/rc.conf); then
+        echo 'inauth_enable="YES"' >> /etc/rc.conf
+    fi
     if pgrep inauth; then
         echo -n "restarting..."
         service inauth restart
@@ -92,6 +95,9 @@ prepare() {
 
     # Start Agent daemon
     echo -n "Starting agent..."
+    if [ $os = "freebsd" ] && ! $(grep -qs inagent_enable /etc/rc.conf); then
+        echo 'inagent_enable="YES"' >> /etc/rc.conf
+    fi
     if pgrep inagent; then
         echo -n "restarting..."
         service inagent restart
