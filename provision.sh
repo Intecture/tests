@@ -7,6 +7,8 @@
 # https://www.tldrlegal.com/l/mpl-2.0>. This file may not be copied,
 # modified, or distributed except according to those terms.
 
+MAKEALIAS="make"
+
 # Install package dependencies
 case $1 in
     centos )
@@ -37,6 +39,7 @@ case $1 in
         pkg upgrade -y
         pkg install -y git libtool gcc glib gmake automake autoconf pkgconf php70 curl gnupg
         cp /usr/local/etc/php.ini-development /usr/local/etc/php.ini
+        MAKEALIAS="gmake"
         ;;
 
     ubuntu )
@@ -55,30 +58,19 @@ export RUST_BACKTRACE=1
 cd /var/tmp
 
 # Install ZMQ
-if [ ! -d libsodium-1.0.11 ]; then
-    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.11.tar.gz
-    curl -sSOL https://download.libsodium.org/libsodium/releases/libsodium-1.0.11.tar.gz.sig
-    curl -sSOL https://download.libsodium.org/jedi.gpg.asc
-    gpg --import jedi.gpg.asc
-    gpg --verify libsodium-1.0.11.tar.gz.sig libsodium-1.0.11.tar.gz
-    tar zxf libsodium-1.0.11.tar.gz
-    cd libsodium-1.0.11
-    ./configure && make && make install || exit 1
+if [ ! -d zeromq-4.2.0 ]; then
+    curl -sSOL https://github.com/zeromq/libzmq/releases/download/v4.2.0/zeromq-4.2.0.tar.gz
+    tar zxf zeromq-4.2.0.tar.gz
+    cd zeromq-4.2.0
+    ./autogen.sh && ./configure && $MAKEALIAS && $MAKEALIAS install || exit 1
     cd ..
 fi
 
-if [ ! -d zeromq4-1-4.1.5 ]; then
-    curl -sSOL https://github.com/zeromq/zeromq4-1/archive/v4.1.5.tar.gz
-    tar zxf v4.1.5.tar.gz
-    cd zeromq4-1-4.1.5
-    ./autogen.sh && ./configure --with-libsodium && make && make install || exit 1
-    cd ..
-fi
-
-if [ ! -d czmq ]; then
-    git clone https://github.com/zeromq/czmq
-    cd czmq
-    ./autogen.sh && ./configure && make && make install || exit 1
+if [ ! -d czmq-4.0.1 ]; then
+    curl -sSOL https://github.com/zeromq/czmq/releases/download/v4.0.1/czmq-4.0.1.tar.gz
+    tar zxf czmq-4.0.1.tar.gz
+    cd czmq-4.0.1
+    ./configure && $MAKEALIAS && $MAKEALIAS install || exit 1
 fi
 
 # Install Rust
