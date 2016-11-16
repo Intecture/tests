@@ -115,32 +115,34 @@ run() {
         echo "done"
 
         find /vagrant/payloads/rust/ -name Cargo.lock -delete
-
-        echo -n "Building initial payload..."
         cp /vagrant/data.json data/hosts/localhost.json
-        cp -PR /vagrant/payloads/rust/package payloads/
 
         # Build one project, then copy target/ to save time
-        incli payload build package || return 1
+        echo -n "Building initial payload..."
+        cp -PR /vagrant/payloads/rust/command payloads/
+        incli payload build command || return 1
         echo "done"
 
         echo -n "Build remaining payloads..."
-        cp -PR /vagrant/payloads/php/command payloads/
-        cp -PR /vagrant/payloads/php/data payloads/
-        cp -PR /vagrant/payloads/php/directory payloads/
-        cp -PR /vagrant/payloads/php/file payloads/
+        cp -PR /vagrant/payloads/rust/data payloads/
+        cp -PR payloads/command/target payloads/data/
+        cp -PR /vagrant/payloads/rust/directory payloads/
+        cp -PR payloads/command/target payloads/directory/
+        cp -PR /vagrant/payloads/rust/file payloads/
+        cp -PR payloads/command/target payloads/file/
+        cp -PR /vagrant/payloads/rust/package payloads/
+        cp -PR payloads/command/target payloads/package/
+        cp -PR /vagrant/payloads/rust/payload payloads/
+        cp -PR payloads/command/target payloads/payload/
+        cp -PR /vagrant/payloads/php/payload_nested payloads/
         cp -PR /vagrant/payloads/rust/service payloads/
+        cp -PR payloads/command/target payloads/service/
         cp -PR /vagrant/payloads/rust/template payloads/
-        cp -PR payloads/package/target payloads/service/
-        cp -PR payloads/package/target payloads/template/
-
+        cp -PR payloads/command/target payloads/template/
         incli payload build || return 1
         echo "done"
 
         # Copy this after building, or the build will fail
-        cp -PR /vagrant/payloads/rust/payload payloads/
-        cp -PR payloads/package/target payloads/payload/
-        cp -PR /vagrant/payloads/php/payload_nested payloads/
         cp -PR /vagrant/payloads/php/payload_missingdep payloads/
 
         sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
@@ -162,31 +164,22 @@ run() {
         cd php
         echo "done"
 
-        echo -n "Building initial payload..."
         cp /vagrant/data.json data/hosts/localhost.json
-        cp -PR /vagrant/payloads/rust/command payloads/
 
-        # Build one project, then copy target/ to save time
-        incli payload build command || return 1
-        echo "done"
-
-        echo -n "Build remaining payloads..."
-        cp -PR /vagrant/payloads/rust/data payloads/
-        cp -PR /vagrant/payloads/rust/directory payloads/
-        cp -PR /vagrant/payloads/rust/file payloads/
+        echo -n "Build payloads..."
+        cp -PR /vagrant/payloads/php/command payloads/
+        cp -PR /vagrant/payloads/php/data payloads/
+        cp -PR /vagrant/payloads/php/directory payloads/
+        cp -PR /vagrant/payloads/php/file payloads/
         cp -PR /vagrant/payloads/php/package payloads/
+        cp -PR /vagrant/payloads/php/payload payloads/
+        cp -PR /vagrant/payloads/php/payload_nested payloads/
         cp -PR /vagrant/payloads/php/service payloads/
         cp -PR /vagrant/payloads/php/template payloads/
-        cp -PR payloads/command/target payloads/data/
-        cp -PR payloads/command/target payloads/directory/
-        cp -PR payloads/command/target payloads/file/
-
         incli payload build || return 1
         echo "done"
 
         # Copy this after building, or the build will fail
-        cp -PR /vagrant/payloads/php/payload payloads/
-        cp -PR /vagrant/payloads/php/payload_nested payloads/
         cp -PR /vagrant/payloads/php/payload_missingdep payloads/
 
         sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
