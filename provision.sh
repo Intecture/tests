@@ -9,6 +9,12 @@
 
 MAKEALIAS="make"
 
+export LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH=/usr/local/lib
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PATH=/usr/local/bin:$PATH
+export RUST_BACKTRACE=1
+
 # Install package dependencies
 case $1 in
     centos )
@@ -16,6 +22,13 @@ case $1 in
         rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
         yum update -y
         yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70w-devel
+
+        # Upgrade version of autoconf
+        wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+        tar xvfvz autoconf-2.69.tar.gz
+        cd autoconf-2.69
+        ./configure
+        make && make install
         ;;
 
     debian )
@@ -48,12 +61,6 @@ case $1 in
         apt-get -y install git build-essential libtool pkg-config curl php7.0-dev
         ;;
 esac
-
-export LIBRARY_PATH=/usr/local/lib
-export LD_LIBRARY_PATH=/usr/local/lib
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
-export PATH=$PATH:/usr/local/bin
-export RUST_BACKTRACE=1
 
 cd /var/tmp
 
