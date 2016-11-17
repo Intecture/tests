@@ -256,6 +256,11 @@ helper_copy() {
     else
         cp -PR "/$1/$2" "$install_dir/$2" || exit 1
         cd "$install_dir/$2"
+
+        # Remove target/ for Cargo projects to prevent explosions
+        if [ -f Cargo.toml ]; then
+            rm -rf target
+        fi
     fi
 }
 
@@ -288,11 +293,11 @@ helper_make() {
         done
     elif [ -f Makefile ]; then
         if [ $# -eq 0 ]; then
-            $_make INSTALL_DIR=$install_dir TARGET=debug
+            $_make TARGET=debug
         fi
 
         for arg in "$@"; do
-            $_make INSTALL_DIR=$install_dir TARGET=debug $arg
+            $_make TARGET=debug $arg
         done
     fi
 }
