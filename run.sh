@@ -220,6 +220,9 @@ install_api() {
     elif [ -d /etc/php7 ]; then
         echo 'extension=inapi.so' > /etc/php7/mods-available/inapi.ini
         ln -s /etc/php7/mods-available/inapi.ini /etc/php7/cli/conf.d/20-inapi.ini
+    elif [ -d /etc/php ]; then
+        echo 'extension=inapi.so' > /etc/php/7.0/mods-available/inapi.ini
+        ln -s /etc/php/7.0/mods-available/inapi.ini /etc/php/7.0/cli/conf.d/20-inapi.ini
     elif [ -f /usr/local/etc/php/extensions.ini ]; then
         echo 'extension=inapi.so' >> /usr/local/etc/php/extensions.ini
     elif [ -f /usr/local/etc/php.ini ]; then
