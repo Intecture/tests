@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 # Copyright 2015-2016 Intecture Developers. See the COPYRIGHT file at the
 # top-level directory of this distribution and at
 # https://intecture.io/COPYRIGHT.
@@ -17,9 +17,23 @@ export RUST_BACKTRACE=1
 
 # Install package dependencies
 case $1 in
-    centos )
+    centos6 )
         rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
         rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
+        yum update -y
+        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70w-devel
+
+        # Upgrade version of autoconf
+        wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+        tar xvfvz autoconf-2.69.tar.gz
+        cd autoconf-2.69
+        ./configure
+        make && make install
+        ;;
+
+    centos7 )
+        rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        rpm -Uvh https://mirror.webtatic.com/yum/el7/latest.rpm
         yum update -y
         yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel php70w-devel
 

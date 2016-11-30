@@ -1,16 +1,25 @@
 Vagrant.configure("2") do |config|
-  config.vm.define "centos" do |centos|
+  config.vm.define "centos6" do |centos|
     centos.vm.box = "centos/6"
     centos.vm.network :private_network, ip: "192.168.178.42"
     centos.ssh.forward_agent = true
     centos.vm.synced_folder ".", "/vagrant", type: "nfs"
     centos.vm.synced_folder "../", "/intecture", type: "nfs"
-    centos.vm.provision "shell", path: "provision.sh", args: "centos"
+    centos.vm.provision "shell", path: "provision.sh", args: "centos6"
+  end
+
+  config.vm.define "centos7" do |centos|
+    centos.vm.box = "centos/7"
+    centos.vm.network :private_network, ip: "192.168.178.43"
+    centos.ssh.forward_agent = true
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
+    centos.vm.synced_folder "../", "/intecture", type: "nfs"
+    centos.vm.provision "shell", path: "provision.sh", args: "centos7"
   end
 
   config.vm.define "ubuntu" do |ubuntu|
     ubuntu.vm.box = "ubuntu/trusty64"
-    ubuntu.vm.network :private_network, ip: "192.168.178.43"
+    ubuntu.vm.network :private_network, ip: "192.168.178.44"
     ubuntu.ssh.forward_agent = true
     ubuntu.vm.synced_folder ".", "/vagrant", type: "nfs"
     ubuntu.vm.synced_folder "../", "/intecture", type: "nfs"
@@ -19,7 +28,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "debian" do |debian|
     debian.vm.box = "debian/jessie64"
-    debian.vm.network :private_network, ip: "192.168.178.44"
+    debian.vm.network :private_network, ip: "192.168.178.45"
     debian.ssh.forward_agent = true
     debian.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
@@ -28,7 +37,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "debian-legacy" do |debian|
     debian.vm.box = "debian/wheezy64"
-    debian.vm.network :private_network, ip: "192.168.178.47"
+    debian.vm.network :private_network, ip: "192.168.178.46"
     debian.ssh.forward_agent = true
     debian.vm.synced_folder ".", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../", "/intecture", type: "nfs"
@@ -37,7 +46,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "fedora" do |fedora|
     fedora.vm.box = "box-cutter/fedora24"
-    fedora.vm.network :private_network, ip: "192.168.178.45"
+    fedora.vm.network :private_network, ip: "192.168.178.47"
     fedora.ssh.forward_agent = true
     fedora.vm.synced_folder ".", "/vagrant", type: "nfs"
     fedora.vm.synced_folder "../", "/intecture", type: "nfs"
@@ -47,7 +56,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "freebsd" do |freebsd|
     freebsd.vm.guest = :freebsd
     freebsd.vm.box = "freebsd/FreeBSD-10.2-STABLE"
-    freebsd.vm.network :private_network, ip: "192.168.178.46"
+    freebsd.vm.network :private_network, ip: "192.168.178.48"
     freebsd.vm.synced_folder ".", "/vagrant", id: "vagrant-root", type: "nfs"
     freebsd.vm.synced_folder "../", "/intecture", id: "vagrant-in", type: "nfs"
     freebsd.vm.provision "shell", path: "provision.sh", args: "freebsd"
@@ -65,7 +74,7 @@ Vagrant.configure("2") do |config|
 
   #config.vm.define "osx" do |osx|
   #  osx.vm.box = "jhcook/osx-yosemite-10.10"
-  #  osx.vm.network :private_network, ip: "192.168.178.47"
+  #  osx.vm.network :private_network, ip: "192.168.178.49"
   #  osx.ssh.forward_agent = true
   #  osx.vm.synced_folder "./", "/intecture", type: "nfs"
   #  osx.vm.provision "shell", inline: "brew install git php56"
