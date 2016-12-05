@@ -2,11 +2,11 @@
     "service": {
         "check_on?": [
             {
-                "?": "/_telemetry/os/platform = 'centos'",
+                "?": "/_telemetry/os/platform = 'centos' && /_telemetry/os/version_maj <= 6",
                 "_": "chkconfig|egrep -qs 'nginx.+3:on'"
             },
             {
-                "?": "/_telemetry/os/platform = 'fedora'",
+                "?": "/_telemetry/os/platform = 'fedora' || /_telemetry/os/platform = 'centos'",
                 "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+enabled'"
             },
             {
@@ -23,11 +23,11 @@
         ],
         "check_off?": [
             {
-                "?": "/_telemetry/os/platform = 'centos'",
+                "?": "/_telemetry/os/platform = 'centos' && /_telemetry/os/version_maj <= 6",
                 "_": "chkconfig|egrep -qs 'nginx.+3:off'"
             },
             {
-                "?": "/_telemetry/os/platform = 'fedora'",
+                "?": "/_telemetry/os/platform = 'fedora' || /_telemetry/os/platform = 'centos'",
                 "_": "systemctl list-unit-files|egrep -qs 'nginx.service.+disabled'"
             },
             {

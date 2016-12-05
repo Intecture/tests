@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate inapi;
 
-use inapi::{Error, Host, Package, Providers};
+use inapi::{Command, Error, Host, Package, Providers};
 use std::env;
 use std::process::exit;
 
@@ -22,6 +22,12 @@ fn main() {
 fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     let mut host = try!(Host::connect_payload(api_endpoint, file_endpoint));
     let data = host.data_owned();
+
+    if needstr!(data => "/_telemetry/os/platform")? == "centos" {
+        let epel_cmd = Command::new("yum install -y epel-release");
+        let result = epel_cmd.exec(&mut host)?;
+        assert_eq!(result.exit_code, 0);
+    }
 
     let mut pkg = try!(Package::new(&mut host, "nginx", None));
 

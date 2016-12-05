@@ -24,6 +24,7 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     let data = host.data_owned();
 
     let platform = try!(needstr!(data => "/_telemetry/os/platform"));
+    let version = try!(needu64!(data => "/_telemetry/os/version_maj"));
 
     if platform == "centos" {
         let mut pkg_epel = Package::new(&mut host, "epel-release", None).unwrap();
@@ -43,11 +44,11 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
         assert_eq!(enable.exit_code, 0);
     }
     match platform {
-        "centos" => {
+        "centos" if version <= 6 => {
             let cmd = try!(Command::new("bash").args(&["-c", "chkconfig|egrep -qs 'nginx.+3:on'"]).output());
             assert!(cmd.status.success());
         },
-        "fedora" => {
+        "fedora" | "centos" => {
             let cmd = try!(Command::new("bash").args(&["-c", "systemctl list-unit-files|egrep -qs 'nginx.service.+enabled'"]).output());
             assert!(cmd.status.success());
         },
@@ -85,11 +86,11 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     let disable = try!(service.action(&mut host, "disable")).unwrap();
     assert_eq!(disable.exit_code, 0);
     match platform {
-        "centos" => {
+        "centos" if version <= 6 => {
             let cmd = try!(Command::new("bash").args(&vec!["-c", "chkconfig|egrep -qs 'nginx.+3:off'"]).output());
             assert!(cmd.status.success());
         },
-        "fedora" => {
+        "fedora" | "centos" => {
             let cmd = try!(Command::new("bash").args(&vec!["-c", "systemctl list-unit-files|egrep -qs 'nginx.service.+disabled'"]).output());
             assert!(cmd.status.success());
         },

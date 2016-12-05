@@ -1,5 +1,6 @@
 <?php
 
+use Intecture\Command;
 use Intecture\Host;
 use Intecture\Package;
 use Intecture\PackageException;
@@ -12,6 +13,13 @@ if ($argc < 2) {
 }
 
 $host = Host::connect_payload($argv[1], $argv[2]);
+
+if ($host->data()['_telemetry']['os']['platform'] == "centos") {
+    $epel_cmd = new Command('yum install -y epel-release');
+    $result = $epel_cmd->exec($host);
+
+    actually_bloody_assert($result['exit_code'], 0);
+}
 
 $pkg = new Package($host, "nginx");
 actually_bloody_assert($pkg->is_installed(), false);

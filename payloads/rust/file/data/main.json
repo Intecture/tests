@@ -2,12 +2,12 @@
     "file": {
         "file_owner?": [
             {
-                "?": "/_telemetry/os/platform = centos",
-                "_": 500
+                "?": "(/_telemetry/os/platform = centos && /_telemetry/os/version_maj = 7) || /_telemetry/os/platform = debian || /_telemetry/os/platform = fedora || /_telemetry/os/platform = ubuntu",
+                "_": 1000
             },
             {
-                "?": "/_telemetry/os/platform = debian || /_telemetry/os/platform = fedora || /_telemetry/os/platform = ubuntu",
-                "_": 1000
+                "?": "/_telemetry/os/platform = centos",
+                "_": 500
             },
             {
                 "?": "/_telemetry/os/platform = freebsd",
