@@ -12,11 +12,15 @@ set -u
 
 # Globals
 install_dir="/var/tmp/intecture-tests"
-os=
+os="{{os}}"
+prefix="{{prefix}}"
+libdir="{{libdir}}"
+sysconfdir="{{sysconfdir}}"
+make="{{make}}"
+php5_version="{{php5_version}}"
+php7_version="{{php7_version}}"
 
 main() {
-    resolve_os
-
     mkdir -p $install_dir
     cd $install_dir
 
@@ -31,40 +35,53 @@ main() {
     # Full stack tests
     run || exit 1
 
-    # remove_api || exit 1
-    # helper_remove intecture agent || exit 1
-    # helper_remove intecture auth || exit 1
-    # helper_remove intecture cli || exit 1
-    # rm -rf /usr/local/etc/intecture
-    # rm -rf "$install_dir/*"
-    #
-    # helper_pkg intecture agent || exit 1
-    # helper_pkg intecture api --with=php || exit 1
-    # helper_pkg intecture auth || exit 1
-    # helper_pkg intecture cli || exit 1
-    #
-    # prepare || exit 1
-    #
-    # # Full stack tests
-    # helper_run vagrant rust || exit 1
-    # # helper_run vagrant c || exit 1
-    # helper_run vagrant php || exit 1
+    service inauth stop
+    service inagent stop
+
+    remove_api || exit 1
+    helper_remove intecture agent || exit 1
+    helper_remove intecture auth || exit 1
+    helper_remove intecture cli || exit 1
+    rm -rf "$sysconfdir/intecture" agent_bootstrap rust php
+
+    local _pkgdir="$(mktemp -d 2>/dev/null || ensure mktemp -d -t intecture)"
+
+    helper_pkg agent $_pkgdir || exit 1
+    helper_pkg_install agent $_pkgdir || exit 1
+    helper_pkg api $_pkgdir || exit 1
+    helper_pkg_install api $_pkgdir || exit 1
+    helper_pkg auth $_pkgdir || exit 1
+    helper_pkg_install auth $_pkgdir || exit 1
+    helper_pkg cli $_pkgdir || exit 1
+    helper_pkg_install cli $_pkgdir || exit 1
+
+    rm -rf $_pkgdir
+
+    prepare || exit 1
+
+    # Full stack tests
+    run || exit 1
 }
 
 prepare() {
     # Create user certificate
     echo -n "Creating user cert..."
-    if [ -f "/usr/local/etc/intecture/certs/user.crt" ]; then
+    if [ -f "$sysconfdir/intecture/certs/user.crt" ]; then
         echo "ignored"
     else
         inauth_cli user add -s user || return 1
         echo "done"
     fi
 
+    # Make sure systemd is up to date
+    if command -v systemctl > /dev/null 2>&1; then
+        systemctl daemon-reload
+    fi
+
     # Start Auth daemon
     echo -n "Starting auth daemon..."
-    sed 's/7101/7103/' </usr/local/etc/intecture/auth.json >auth.json.tmp
-    sed 's/7102/7104/' <auth.json.tmp >/usr/local/etc/intecture/auth.json
+    sed 's/7101/7103/' < "$sysconfdir/intecture/auth.json" > auth.json.tmp
+    sed 's/7102/7104/' < auth.json.tmp > "$sysconfdir/intecture/auth.json"
     if [ $os = "freebsd" ] && ! $(grep -qs inauth_enable /etc/rc.conf); then
         echo 'inauth_enable="YES"' >> /etc/rc.conf
     fi
@@ -74,6 +91,9 @@ prepare() {
     else
         service inauth start
     fi
+    # Prevent race condition between API clients authenticating and
+    # auth handler receiving certs from Publisher.
+    sleep 1
     echo "done"
 
     # Bootstrap Agent
@@ -83,12 +103,14 @@ prepare() {
     else
         incli project init agent_bootstrap rust || return 1
         cp user.crt agent_bootstrap/
-        cp /usr/local/etc/intecture/auth.crt_public agent_bootstrap/auth.crt
+        cp "$sysconfdir/intecture/auth.crt_public" agent_bootstrap/auth.crt
         cd agent_bootstrap
-        sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.tmp
+        sed 's/auth.example.com/localhost/' < project.json |
+        sed 's/7101/7103/' |
+        sed 's/7102/7104/' > project.json.tmp
         mv project.json.tmp project.json
         incli host add -s localhost || return 1
-        cp localhost.crt /usr/local/etc/intecture/agent.crt
+        cp localhost.crt "$sysconfdir/intecture/agent.crt"
         echo "done"
         cd ..
     fi
@@ -145,10 +167,12 @@ run() {
         # Copy this after building, or the build will fail
         cp -PR /vagrant/payloads/php/payload_missingdep payloads/
 
-        sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+        sed 's/auth.example.com/localhost/' < project.json |
+        sed 's/7101/7103/' |
+        sed 's/7102/7104/' > project.json.new
         mv project.json.new project.json
         cp "$install_dir/user.crt" .
-        cp /usr/local/etc/intecture/auth.crt_public auth.crt
+        cp "$sysconfdir/intecture/auth.crt_public" auth.crt
         sed "s~intecture-api = .*~intecture-api = { path = \"$install_dir/api\" }~" Cargo.toml > Cargo.toml.new
         mv Cargo.toml.new Cargo.toml
 
@@ -182,10 +206,12 @@ run() {
         # Copy this after building, or the build will fail
         cp -PR /vagrant/payloads/php/payload_missingdep payloads/
 
-        sed 's/auth.example.com:7101/localhost:7103/' <project.json >project.json.new
+        sed 's/auth.example.com/localhost/' < project.json |
+        sed 's/7101/7103/' |
+        sed 's/7102/7104/' > project.json.new
         mv project.json.new project.json
         cp "$install_dir/user.crt" .
-        cp /usr/local/etc/intecture/auth.crt_public auth.crt
+        cp "$sysconfdir/intecture/auth.crt_public" auth.crt
 
         echo "Run PHP project..."
         incli run localhost || return 1
@@ -206,28 +232,23 @@ install_api() {
     helper_make install
 
     # C binding
-    install bindings/c/inapi.h /usr/local/include
+    install bindings/c/inapi.h "$prefix/include"
 
-    # PHP 7 binding
-    cd bindings/php7
-    helper_make
-    helper_make install test || return 1
-    cd ../..
+    cd bindings
+    local _v="5 7"
+    for ver in ${_v}; do
+        cp -R "php$ver" "php${ver}_build"
+        cd "php${ver}_build"
+        helper_make
+        helper_make test install || return 1
+        cd ..
+        rm -rf "php${ver}_build"
+    done
+    cd ..
 
     # Create module ini file
-    if [ -d /etc/php.d ]; then
-        echo 'extension=inapi.so' > /etc/php.d/inapi.ini
-    elif [ -d /etc/php7 ]; then
-        echo 'extension=inapi.so' > /etc/php7/mods-available/inapi.ini
-        ln -s /etc/php7/mods-available/inapi.ini /etc/php7/cli/conf.d/20-inapi.ini
-    elif [ -d /etc/php ]; then
-        echo 'extension=inapi.so' > /etc/php/7.0/mods-available/inapi.ini
-        ln -s /etc/php/7.0/mods-available/inapi.ini /etc/php/7.0/cli/conf.d/20-inapi.ini
-    elif [ -f /usr/local/etc/php/extensions.ini ]; then
-        echo 'extension=inapi.so' >> /usr/local/etc/php/extensions.ini
-    elif [ -f /usr/local/etc/php.ini ]; then
-        echo "extension=inapi.so" >> /usr/local/etc/php.ini
-    fi
+    echo 'extension=inapi.so' > ~/.phpenv/versions/$php5_version/etc/conf.d/inapi.ini
+    echo 'extension=inapi.so' > ~/.phpenv/versions/$php7_version/etc/conf.d/inapi.ini
 
     cd ..
     echo "done"
@@ -235,21 +256,10 @@ install_api() {
 
 remove_api() {
     helper_remove intecture api || exit 1
-
-    find / -name inapi.so -exec rm -f {} \;
-    rm -f /usr/local/include/inapi.h
-
-    if [ -d /etc/php.d ]; then
-        rm -f /etc/php.d/inapi.ini
-    elif [ -d /etc/php7 ]; then
-        rm -f /etc/php7/mods-available/inapi.ini /etc/php7/cli/conf.d/20-inapi.ini
-    elif [ -f /usr/local/etc/php/extensions.ini ]; then
-        sed 's/extension=inapi.so//' </usr/local/etc/php/extensions.ini >extensions.ini.new
-        mv extensions.ini.new /usr/local/etc/php/extensions.ini
-    elif [ -f /usr/local/etc/php.ini ]; then
-        sed 's/extension=inapi.so//' </usr/local/etc/php.ini >php.ini.new
-        mv php.ini.new /usr/local/etc/php.ini
-    fi
+    rm -f ~/.phpenv/versions/$php5_version/etc/conf.d/inapi.ini
+    rm -f ~/.phpenv/versions/$php5_version/lib/php/extensions/debug-non-zts-20131226/inapi.so
+    rm -f ~/.phpenv/versions/$php7_version/etc/conf.d/inapi.ini
+    rm -f ~/.phpenv/versions/$php7_version/lib/php/extensions/debug-non-zts-20151012/inapi.so
 }
 
 helper_copy() {
@@ -268,39 +278,27 @@ helper_copy() {
 }
 
 helper_make() {
-    local _make
-
-    if test $os = "freebsd"; then
-        _make="gmake"
-    else
-        _make="make"
-    fi
-
     if [ -f config.m4 ]; then
         if [ $# -eq 0 ]; then
             phpize
-            if test $os = "freebsd"; then
-                ./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib" --prefix=/usr/local
-            else
-                ./configure --prefix=/usr/local
-            fi
-            $_make
+            ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir
+            $make
         fi
 
         for arg in "$@"; do
             if test $arg = "test"; then
-                TEST_PHP_ARGS="-q" $_make test
+                TEST_PHP_ARGS="-q" $make test
             else
-                $_make $arg
+                $make $arg
             fi
         done
     elif [ -f Makefile ]; then
         if [ $# -eq 0 ]; then
-            $_make TARGET=debug
+            $make TARGET=debug PREFIX=$prefix LIBDIR=$libdir SYSCONFDIR=$sysconfdir
         fi
 
         for arg in "$@"; do
-            $_make TARGET=debug $arg
+            $make TARGET=debug PREFIX=$prefix LIBDIR=$libdir SYSCONFDIR=$sysconfdir $arg
         done
     fi
 }
@@ -318,64 +316,24 @@ helper_remove() {
     echo -n "Remove $2..."
     cd "$install_dir/$2"
     helper_make uninstall || return 1
-    cd "$install_dir"
-    rm -rf "$install_dir/$2"
+    cd ..
     echo "done"
 }
 
 helper_pkg() {
-    echo -n "Pkg $2..."
-    helper_copy "$1" "$2" || return 0
+    echo -n "Pkg $1..."
+    cd "$install_dir/$1"
 
-    local _target
-    if test $os = "freebsd"; then
-        _target="unknown-freebsd"
-    elif test $os = "macos"; then
-        _target="apple-darwin"
-    else
-        _target="unknown-linux-gnu"
-    fi
+    ./package.sh || return 1
 
-    if [ ! -f /usr/local/bin/bucket ]; then
-        curl -sSfL "https://static.rust-bucket.io/x86_64-$_target/latest" -o /usr/local/bin/bucket
-        chmod +x /usr/local/bin/bucket
-    fi
+    cp ".pkg/$os/$(ls .pkg/$os/ | sort -nr | head -1)" "$2/$1.tar.bz2"
 
-    bucket install ".bucket/$1-$2_x86_64-$_target.pkg" --with=php || return 1
     cd "$install_dir"
     echo "done"
 }
 
-resolve_os() {
-    # Fedora
-    if $(grep -qs Fedora /etc/redhat-release); then
-        os=fedora
-        HlEscape="\e"
-
-    # RedHat
-    elif $(ls /etc/redhat-release > /dev/null 2>&1); then
-        os=redhat
-        HlEscape="\e"
-
-    # Debian
-    elif $(ls /etc/debian_version > /dev/null 2>&1); then
-        os=debian
-        HlEscape="\e"
-
-    # macOS
-    elif test $(uname -s 2>&1) = "Darwin"; then
-        os=macos
-        HlEscape="\e"
-
-    # BSD
-    elif test $(uname -s 2>&1) = "FreeBSD"; then
-        os=freebsd
-        HlEscape="\033"
-
-    else
-        echo_err "Unknown OS"
-        exit 1
-    fi
+helper_pkg_install() {
+    curl -sSf https://get.intecture.io | sh -s -- -y -d $2 $1
 }
 
 main "$@"
