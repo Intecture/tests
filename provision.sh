@@ -30,13 +30,20 @@ case $1 in
         libdir="$prefix/lib64"
 
         yum update -y
-        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake libunwind-devel
+        yum -y install centos-release-scl
+        yum -y install devtoolset-3-toolchain git libtool glib* curl-devel zlib-devel openssl-devel wget cmake libunwind-devel
+
+        # Enable devtoolset
+        echo '. /opt/rh/devtoolset-3/enable' >> ~/.bashrc
+        # Set MANPATH to avoid undefined var errors
+        export MANPATH=""
+        . /opt/rh/devtoolset-3/enable
 
         # Upgrade version of autoconf
         wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
         tar xvfvz autoconf-2.69.tar.gz
         cd autoconf-2.69
-        ./configure
+        ./configure --prefix=$prefix --libdir=$libdir
         make && make install
         ;;
 
@@ -53,7 +60,7 @@ case $1 in
         wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
         tar xvfvz autoconf-2.69.tar.gz
         cd autoconf-2.69
-        ./configure
+        ./configure --prefix=$prefix --libdir=$libdir
         make && make install
         ;;
 
@@ -99,7 +106,7 @@ case $1 in
         libdir="$prefix/lib"
 
         apt-get update
-        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libunwind-dev libssl-dev
+        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libunwind8-dev libssl-dev
         ;;
 esac
 
@@ -110,6 +117,12 @@ if [ ! -d zeromq-4.2.0 ]; then
     curl -sSOL https://github.com/zeromq/libzmq/releases/download/v4.2.0/zeromq-4.2.0.tar.gz
     tar zxf zeromq-4.2.0.tar.gz
     cd zeromq-4.2.0
+
+    # XXX There is a bug when linking libunwind on some platforms.
+    # Until a new release is made containing this patch, we have to
+    # apply it manually.
+    git apply /vagrant/configure.ac.patch
+
     ./autogen.sh
     ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir
     $make && $make install || exit 1
@@ -135,9 +148,13 @@ export PHPENV_ROOT="/root/.phpenv"
 export PATH="${PHPENV_ROOT}/bin:${PATH}"
 eval "$(phpenv init -)"
 EOF
-. ~/.bashrc
 
-sed -i -e 's/rbenv/phpenv/g' "$PHPENV_ROOT"/completions/rbenv.{bash,zsh}
+# Run these manually instead of sourcing .bashrc as .bashrc is only
+# intended for interactive shells
+export PHPENV_ROOT="/root/.phpenv"
+export PATH="${PHPENV_ROOT}/bin:${PATH}"
+eval "$(phpenv init -)"
+
 sed -i -s 's/\.rbenv-version/.phpenv-version/g' "$PHPENV_ROOT"/libexec/rbenv-local
 sed -i -s 's/\.rbenv-version/.phpenv-version/g' "$PHPENV_ROOT"/libexec/rbenv-version-file
 sed -i -s 's/\.ruby-version/.php-version/g' "$PHPENV_ROOT"/libexec/rbenv-local
@@ -165,7 +182,11 @@ sed 's/install_xdebug.*//' < "$phpbuild_dir/definitions/$php7_version" > "$phpbu
 mv "$phpbuild_dir/definitions/$php7_version.new" "$phpbuild_dir/definitions/$php7_version"
 
 phpenv install $php5_version
+rm -rf /tmp/php-build
+
 phpenv install $php7_version
+rm -rf /tmp/php-build
+
 phpenv version-file-write ~/.phpenv/version $php7_version
 ln -s ~/.phpenv/versions/$php5_version ~/.phpenv/versions/5.6
 ln -s ~/.phpenv/versions/$php7_version ~/.phpenv/versions/7.0
