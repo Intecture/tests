@@ -61,6 +61,16 @@ main() {
 
     # Full stack tests
     run || exit 1
+
+    # Copy verified packages to /intecture
+    local _apps="agent api auth cli"
+    for app in ${_apps}; do
+        local _pkg=$(ls $app/.pkg/$os/ | sort -nr | head -1)
+        if [ ! -f "/intecture/$app/.pkg/$os/$_pkg" ]; then
+            mkdir -p "/intecture/$app/.pkg/$os"
+            cp "$app/.pkg/$os/$_pkg" "/intecture/$app/.pkg/$os/"
+        fi
+    done
 }
 
 prepare() {
@@ -179,6 +189,13 @@ run() {
         echo "Run Rust project..."
         incli run localhost || return 1
 
+        # XXX This is a hack to restore openssl libs after nginx has
+        # wiped them out. When we move to static linking, this won't
+        # be a problem anymore.
+        if [ $os = "freebsd" ]; then
+            pkg install -y openssl-devel
+        fi
+
         cd ..
     fi
 
@@ -215,6 +232,13 @@ run() {
 
         echo "Run PHP project..."
         incli run localhost || return 1
+
+        # XXX This is a hack to restore openssl libs after nginx has
+        # wiped them out. When we move to static linking, this won't
+        # be a problem anymore.
+        if [ $os = "freebsd" ]; then
+            pkg install -y openssl-devel
+        fi
 
         cd ..
     fi
