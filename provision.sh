@@ -24,37 +24,39 @@ php7_version=7.0.13
 # Install package dependencies
 case $1 in
     centos6 )
-        os="redhat"
+        os="centos"
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
 
         yum update -y
-        yum -y install centos-release-scl
-        yum -y install devtoolset-3-toolchain git libtool glib* curl-devel zlib-devel openssl-devel wget cmake libunwind-devel
-
-        # Enable devtoolset
-        echo '. /opt/rh/devtoolset-3/enable' >> ~/.bashrc
-        # Set MANPATH to avoid undefined var errors
-        export MANPATH=""
-        . /opt/rh/devtoolset-3/enable
+        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
 
         # Upgrade version of autoconf
         wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
-        tar xvfvz autoconf-2.69.tar.gz
+        tar xfz autoconf-2.69.tar.gz
         cd autoconf-2.69
+        ./configure --prefix=$prefix --libdir=$libdir
+        make && make install
+        cd ..
+
+        # Install libssh2 manually as the automatic cmake build
+        # requires a higher version of glibc
+        wget http://libssh2.org/download/libssh2-1.7.0.tar.gz
+        tar xfz libssh2-1.7.0.tar.gz
+        cd libssh2-1.7.0
         ./configure --prefix=$prefix --libdir=$libdir
         make && make install
         ;;
 
     centos7 )
-        os="redhat"
+        os="centos"
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
 
         yum update -y
-        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake libunwind-devel
+        yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
 
         # Upgrade version of autoconf
         wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
@@ -71,17 +73,17 @@ case $1 in
         libdir="$prefix/lib"
 
         apt-get update
-        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libunwind-dev libssl-dev
+        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libssl-dev
         ;;
 
     fedora )
-        os="redhat"
+        os="fedora"
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
 
         dnf update -y
-        dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake libunwind-devel
+        dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
         ;;
 
     freebsd )
@@ -100,13 +102,13 @@ case $1 in
         ;;
 
     ubuntu )
-        os="debian"
+        os="ubuntu"
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib"
 
         apt-get update
-        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libunwind8-dev libssl-dev
+        apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libssl-dev
         ;;
 esac
 
@@ -165,7 +167,6 @@ sed -i -e 's/\Ruby/PHP/g' "$PHPENV_ROOT"/libexec/rbenv-which
 
 cat << "EOF" > ~/.phpenv/plugins/php-build/share/php-build/default_configure_options
 --disable-all
---enable-debug
 --without-pear
 EOF
 
