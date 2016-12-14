@@ -35,17 +35,9 @@ Vagrant.configure("2") do |config|
     debian.vm.provision "shell", path: "provision.sh", args: "debian"
   end
 
-  config.vm.define "debian-legacy" do |debian|
-    debian.vm.box = "debian/wheezy64"
-    debian.vm.network :private_network, ip: "192.168.178.46"
-    debian.ssh.forward_agent = true
-    debian.vm.synced_folder ".", "/vagrant", type: "nfs"
-    debian.vm.synced_folder "../", "/intecture", type: "nfs"
-    debian.vm.provision "shell", path: "provision.sh", args: "debian"
-  end
-
   config.vm.define "fedora" do |fedora|
-    fedora.vm.box = "box-cutter/fedora24"
+    fedora.vm.box = "boxcutter/fedora24"
+    fedora.vm.box_version = "3.0.4"
     fedora.vm.network :private_network, ip: "192.168.178.47"
     fedora.ssh.forward_agent = true
     fedora.vm.synced_folder ".", "/vagrant", type: "nfs"
@@ -72,12 +64,11 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  #config.vm.define "osx" do |osx|
-  #  osx.vm.box = "jhcook/osx-yosemite-10.10"
-  #  osx.vm.network :private_network, ip: "192.168.178.49"
-  #  osx.ssh.forward_agent = true
-  #  osx.vm.synced_folder "./", "/intecture", type: "nfs"
-  #  osx.vm.provision "shell", inline: "brew install git php56"
-  #  osx.vm.provision "shell", path: "install.sh", args: "-y dev-php"
-  #end
+  config.vm.define "macos" do |osx|
+   osx.vm.box = "jhcook/macos-sierra"
+   osx.vm.network :private_network, ip: "192.168.178.49"
+   osx.ssh.forward_agent = true
+   osx.vm.synced_folder "./", "/intecture", type: "nfs"
+   osx.vm.provision "shell", path: "provision.sh", args: "macos"
+  end
 end
