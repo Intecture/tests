@@ -182,11 +182,12 @@ mv "$phpbuild_dir/definitions/$php5_version.new" "$phpbuild_dir/definitions/$php
 sed 's/install_xdebug.*//' < "$phpbuild_dir/definitions/$php7_version" > "$phpbuild_dir/definitions/$php7_version.new"
 mv "$phpbuild_dir/definitions/$php7_version.new" "$phpbuild_dir/definitions/$php7_version"
 
-phpenv install $php5_version
-rm -rf /tmp/php-build
+# Force php-build dir to reside on /var to ensure enough disk space
+mkdir /var/tmp/php-build
+ln -s /var/tmp/php-build /tmp/php-build
 
+phpenv install $php5_version
 phpenv install $php7_version
-rm -rf /tmp/php-build
 
 phpenv version-file-write ~/.phpenv/version $php7_version
 ln -s ~/.phpenv/versions/$php5_version ~/.phpenv/versions/5.6
