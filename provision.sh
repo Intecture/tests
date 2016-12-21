@@ -17,6 +17,7 @@ os=
 prefix=
 libdir=
 sysconfdir=
+pkgconfdir=
 make="make"
 php5_version=5.6.28
 php7_version=7.0.13
@@ -28,6 +29,7 @@ case $1 in
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
+        pkgconfdir="$libdir/pkgconfig"
 
         yum update -y
         yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
@@ -54,6 +56,7 @@ case $1 in
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
+        pkgconfdir="$libdir/pkgconfig"
 
         yum update -y
         yum -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
@@ -71,6 +74,7 @@ case $1 in
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib"
+        pkgconfdir="$libdir/pkgconfig"
 
         apt-get update
         apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libssl-dev
@@ -81,6 +85,7 @@ case $1 in
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib64"
+        pkgconfdir="$libdir/pkgconfig"
 
         dnf update -y
         dnf -y install git libtool gcc-c++ glib* curl-devel zlib-devel openssl-devel wget cmake
@@ -91,10 +96,8 @@ case $1 in
         prefix="/usr/local"
         libdir="$prefix/lib"
         sysconfdir="$prefix/etc"
+        pkgconfdir="$prefix/libdata/pkgconfig"
         make="gmake"
-
-        export LIBRARY_PATH="$libdir"
-        export PKG_CONFIG_PATH="$libdir/pkgconfig"
 
         pkg update -f && pkg check -Ba
         pkg upgrade -y
@@ -106,6 +109,7 @@ case $1 in
         prefix="/usr"
         sysconfdir="/etc"
         libdir="$prefix/lib"
+        pkgconfdir="$libdir/pkgconfig"
 
         apt-get update
         apt-get -y install git build-essential libtool pkg-config curl wget cmake automake autoconf libssl-dev
@@ -119,14 +123,8 @@ if [ ! -d zeromq-4.2.0 ]; then
     curl -sSOL https://github.com/zeromq/libzmq/releases/download/v4.2.0/zeromq-4.2.0.tar.gz
     tar zxf zeromq-4.2.0.tar.gz
     cd zeromq-4.2.0
-
-    # XXX There is a bug when linking libunwind on some platforms.
-    # Until a new release is made containing this patch, we have to
-    # apply it manually.
-    git apply /vagrant/configure.ac.patch
-
     ./autogen.sh
-    ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir
+    ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir --with-pkgconfigdir=$pkgconfdir
     $make && $make install || exit 1
     cd ..
 fi
@@ -135,12 +133,13 @@ if [ ! -d czmq-4.0.1 ]; then
     curl -sSOL https://github.com/zeromq/czmq/releases/download/v4.0.1/czmq-4.0.1.tar.gz
     tar zxf czmq-4.0.1.tar.gz
     cd czmq-4.0.1
-    ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir
+    ./configure --prefix=$prefix --libdir=$libdir --sysconfdir=$sysconfdir --with-pkgconfigdir=$pkgconfdir
     $make && $make install || exit 1
 fi
 
 # Install Rust
 curl https://sh.rustup.rs -sSf | sh -s -- -y
+echo ". ~/.cargo/env" >> ~/.bashrc
 . ~/.cargo/env
 
 # Install PHP
