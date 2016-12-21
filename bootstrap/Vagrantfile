@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
     centos.ssh.forward_agent = true
     centos.vm.synced_folder "..", "/vagrant", type: "nfs"
     centos.vm.synced_folder "../..", "/intecture", type: "nfs"
-    centos.vm.provision "shell", path: "provision.sh", args: ["centos6", "192.168.179.42", "centos7", "192.168.179.43"]
+    # centos.vm.provision "shell", path: "provision.sh", args: ["centos6", "192.168.179.42", "centos7", "192.168.179.43"]
   end
 
   config.vm.define "centos7" do |centos|
@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
     centos.ssh.forward_agent = true
     centos.vm.synced_folder "..", "/vagrant", type: "nfs"
     centos.vm.synced_folder "../..", "/intecture", type: "nfs"
-    centos.vm.provision "shell", path: "provision.sh", args: ["centos7", "192.168.179.43", "centos6", "192.168.179.42"]
+    # centos.vm.provision "shell", path: "provision.sh", args: ["centos7", "192.168.179.43", "ubuntu", "192.168.179.44"]
   end
 
   config.vm.define "ubuntu" do |ubuntu|
@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     ubuntu.ssh.forward_agent = true
     ubuntu.vm.synced_folder "..", "/vagrant", type: "nfs"
     ubuntu.vm.synced_folder "../..", "/intecture", type: "nfs"
-    ubuntu.vm.provision "shell", path: "provision.sh", args: ["ubuntu", "192.168.179.44", "debian", "192.168.179.45"]
+    # ubuntu.vm.provision "shell", path: "provision.sh", args: ["ubuntu", "192.168.179.44", "debian", "192.168.179.45"]
   end
 
   config.vm.define "debian" do |debian|
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
     debian.ssh.forward_agent = true
     debian.vm.synced_folder "..", "/vagrant", type: "nfs"
     debian.vm.synced_folder "../..", "/intecture", type: "nfs"
-    debian.vm.provision "shell", path: "provision.sh", args: ["debian", "192.168.179.45", "fedora", "192.168.179.47"]
+    # debian.vm.provision "shell", path: "provision.sh", args: ["debian", "192.168.179.45", "fedora", "192.168.179.47"]
   end
 
   config.vm.define "fedora" do |fedora|
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
     fedora.ssh.forward_agent = true
     fedora.vm.synced_folder "..", "/vagrant", type: "nfs"
     fedora.vm.synced_folder "../..", "/intecture", type: "nfs"
-    fedora.vm.provision "shell", path: "provision.sh", args: ["fedora", "192.168.179.47", "freebsd", "192.168.179.48"]
+    # fedora.vm.provision "shell", path: "provision.sh", args: ["fedora", "192.168.179.47", "freebsd", "192.168.179.48"]
   end
 
   config.vm.define "freebsd" do |freebsd|
@@ -51,7 +51,7 @@ Vagrant.configure("2") do |config|
     freebsd.vm.network :private_network, ip: "192.168.179.48"
     freebsd.vm.synced_folder "..", "/vagrant", id: "vagrant-root", type: "nfs"
     freebsd.vm.synced_folder "../..", "/intecture", id: "intecture-root", type: "nfs"
-    freebsd.vm.provision "shell", path: "provision.sh", args: ["freebsd", "192.168.179.48", "centos6", "192.168.179.42"]
+    # freebsd.vm.provision "shell", path: "provision.sh", args: ["freebsd", "192.168.179.48", "centos6", "192.168.179.42"]
     freebsd.vm.base_mac = "080027D14C66"
     freebsd.ssh.shell = "sh"
     freebsd.vm.provider :virtualbox do |vb, override|

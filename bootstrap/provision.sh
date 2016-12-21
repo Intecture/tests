@@ -7,6 +7,7 @@ myaddr=$2
 hostname=$3
 hostaddr=$4
 sysconfdir=
+preinstall=
 
 case $os in
     centos6 )
@@ -32,9 +33,20 @@ case $os in
         dnf -y install php git
         ;;
 
-    debian | ubuntu )
+    debian )
         sysconfdir=/etc
-        apt-get install -y php git
+        echo "deb http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
+        echo "deb-src http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
+        wget https://www.dotdeb.org/dotdeb.gpg
+        apt-key add dotdeb.gpg
+        apt-get install -y php5 git pkg-config curl
+        ;;
+
+    ubuntu )
+        sysconfdir=/etc
+        add-apt-repository -y ppa:ondrej/php
+        apt-get update
+        apt-get install -y php5.6 git pkg-config
         ;;
 
     freebsd )
@@ -47,9 +59,19 @@ case $os in
         exit 1
 esac
 
-curl -sSf https://get.intecture.io | sh -s -- -y api
-curl -sSf https://get.intecture.io | sh -s -- auth
-curl -sSf https://get.intecture.io | sh -s -- cli
+case $hostname in
+    debian | ubuntu )
+        preinstall="sudo apt-get install -y pkg-config curl"
+        ;;
+
+    freebsd )
+        preinstall="sudo pkg install -y pkgconf curl"
+        ;;
+esac
+
+curl -sSf https://get.intecture.io | sh -s -- -y api || exit 1
+curl -sSf https://get.intecture.io | sh -s -- auth || exit 1
+curl -sSf https://get.intecture.io | sh -s -- cli || exit 1
 
 inauth_cli user add -s user || exit 1
 
@@ -65,7 +87,7 @@ cp "$sysconfdir/intecture/auth.crt_public" bootstrap/auth.crt
 cd bootstrap
 sed "s/auth.example.com/$myaddr/" < project.json > project.json.tmp
 mv project.json.tmp project.json
-incli host bootstrap "$hostaddr" -u vagrant -i "/vagrant/bootstrap/.vagrant/machines/$hostname/virtualbox/private_key" || exit 1
+incli host bootstrap "$hostaddr" -u vagrant -i "/vagrant/bootstrap/.vagrant/machines/$hostname/virtualbox/private_key" -m "$preinstall" || exit 1
 
 cp /vagrant/bootstrap/main.php src/
 incli run "$hostaddr" "$hostname"
