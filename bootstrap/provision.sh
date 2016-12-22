@@ -51,7 +51,7 @@ case $os in
 
     freebsd )
         sysconfdir=/usr/local/etc
-        pkg install -y php56 git
+        pkg install -y php56 git pkgconf curl
         ;;
 
     * )
