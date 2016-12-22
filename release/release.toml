@@ -1,0 +1,3 @@
+hostname = "localhost"
+username = "root"
+private_key = "~/.ssh/id_rsa"

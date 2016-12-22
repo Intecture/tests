@@ -1,0 +1,13 @@
+[package]
+name = "release"
+version = "0.1.0"
+authors = [ "Peter Hayes <peter.hayes@betweenlines.co.uk>" ]
+license = "MPL-2.0"
+description = "Package release manager."
+
+[dependencies]
+docopt = "0.6"
+regex = "0.1"
+rustc-serialize = "0.3"
+ssh2 = "0.3"
+toml = "0.2"
