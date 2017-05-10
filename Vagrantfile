@@ -24,6 +24,12 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.synced_folder ".", "/vagrant", type: "nfs"
     ubuntu.vm.synced_folder "../", "/intecture", type: "nfs"
     ubuntu.vm.provision "shell", path: "provision.sh", args: "ubuntu"
+
+    # Ubuntu runs out of memory compiling syntex_syntax, which kills the build
+    ubuntu.vm.provider :virtualbox do |vb, override|
+      vb.customize ["modifyvm", :id, "--memory", "2048"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
   end
 
   config.vm.define "debian" do |debian|

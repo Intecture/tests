@@ -102,6 +102,9 @@ case $1 in
         pkg update -f && pkg check -Ba
         pkg upgrade -y
         pkg install -y git libtool gcc glib gmake automake autoconf pkgconf curl gnupg wget cmake bash re2c bison openssl-devel
+
+        # Work around libcurl issue
+        export RUSTUP_USE_HYPER=1
         ;;
 
     ubuntu )
