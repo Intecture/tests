@@ -23,7 +23,7 @@ actually_bloody_assert($data['data']['obj']['nested'], 'Boo!');
 
 // Telemetry data
 $out = $exit = NULL;
-$hostname = exec('hostname -f', $out, $exit);
+$hostname = exec('hostname', $out, $exit);
 actually_bloody_assert($exit, 0);
 actually_bloody_assert($data['_telemetry']['hostname'], $hostname);
 

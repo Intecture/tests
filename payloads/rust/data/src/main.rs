@@ -40,7 +40,7 @@ fn run(api_endpoint: &str, file_endpoint: &str) -> Result<(), Error> {
     assert_eq!(wantstr!(data => "/data/obj/nested"), Some("Boo!"));
 
     // Telemetry data
-    let output = try!(Command::new("hostname").arg("-f").output());
+    let output = try!(Command::new("hostname").output());
     assert!(output.status.success());
     assert_eq!(wantstr!(data => "/_telemetry/hostname"), Some(try!(str::from_utf8(&output.stdout)).trim()));
 
