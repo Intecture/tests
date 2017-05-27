@@ -74,7 +74,8 @@ Vagrant.configure("2") do |config|
    osx.vm.box = "jhcook/macos-sierra"
    osx.vm.network :private_network, ip: "192.168.178.49"
    osx.ssh.forward_agent = true
-   osx.vm.synced_folder "./", "/intecture", type: "nfs"
+   osx.vm.synced_folder ".", "/vagrant", type: "nfs"
+   osx.vm.synced_folder "../", "/intecture", type: "nfs"
    osx.vm.provision "shell", path: "provision.sh", args: "macos"
   end
 end
